@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-library(dada2)
+library(dada2);
 
 args <- commandArgs(trailingOnly = TRUE)
 file <- args[1]
@@ -10,7 +10,7 @@ samplename <- gsub(pattern='.fastq.gz','',basename(file))
 # filter and trim the reads (DADA2 requires no Ns)
 filterAndTrim(
     fwd = file,
-    filt = 'filtered.fastq.gz',
+    filt = '/share/trnL_blast/tmp/filtered.fastq.gz',
     maxN = 0,
     maxEE = 2,
     truncQ = 2,
@@ -22,12 +22,12 @@ filterAndTrim(
 
 # learn the error rates
 err <- learnErrors(
-    fls = 'filtered.fastq.gz',
+    fls = '/share/trnL_blast/tmp/filtered.fastq.gz',
     multithread = TRUE
 )
 
 # dereplicate identical reads
-derep <- derepFastq(fls = 'filtered.fastq.gz')
+derep <- derepFastq(fls = '/share/trnL_blast/tmp/filtered.fastq.gz')
 
 # apply sample inference
 dadaresult <- dada(
@@ -49,4 +49,4 @@ seqtab.nochim <- removeBimeraDenovo(
 
 # write sequence table to file
 dir.create(dirname(output), showWarnings=FALSE, recursive=TRUE)
-write.csv(seqtab.nochim, output)
+write.csv(seqtab.nochim, output, row.names=FALSE)
