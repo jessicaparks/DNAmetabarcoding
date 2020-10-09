@@ -11,6 +11,8 @@ os.makedirs(TMP, exist_ok=True)
 
 def trim_primers(input, primers, output):
     shutil.copy(input, output)
+    #os.system(r"cutadapt.exe -g file:Primers.fasta -e=0.25 --untrimmed-output adapterlessSeqs.fasta -o temp.fastq PP1-C1_S1_L001_R1_001.fastq")
+    #os.system(r"cutadapt.exe -a file:ReversePrimers.fasta -e=0.25 -m=50 --too-short-output shortseqs.fasta -o trimmed.fastq temp.fastq")
 
 
 def run_dada2(input, output):
