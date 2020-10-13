@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-library(dada2)
+library(dada2, quietly=TRUE)
 
 args <- commandArgs(trailingOnly = TRUE)
 file <- args[1]
