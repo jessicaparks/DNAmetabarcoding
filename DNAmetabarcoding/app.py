@@ -9,10 +9,20 @@ TMP = '/share/trnL_blast/tmp'
 os.makedirs(TMP, exist_ok=True)
 
 
-def trim_primers(input, primers, output):
+def trim_primers(input, primers, output, adapterless, tooShort):
     shutil.copy(input, output)
-    #os.system(r"cutadapt.exe -g file:Primers.fasta -e=0.25 --untrimmed-output adapterlessSeqs.fasta -o temp.fastq PP1-C1_S1_L001_R1_001.fastq")
-    #os.system(r"cutadapt.exe -a file:ReversePrimers.fasta -e=0.25 -m=50 --too-short-output shortseqs.fasta -o trimmed.fastq temp.fastq")
+    #prep forward primer file(add ^ to the start of each sequence)
+    
+    #run cutAdapt to trim 5' end
+    #cutadapt5Prime = "cutadapt.exe -g file:" + primers + " -e=0.25 --untrimmed-output " + adapterless + " -o temp.fastq " + input
+    #os.system(cutadapt5Prime)
+
+    #prep reverse primer file(make reverse compliments and add X to the 3' end)
+
+    #run cutAdapt to trim 3' end
+    #cutadapt3Prime = "cutadapt.exe -a file:" + reverseprimers + " -e=0.25 -m=50 --too-short-output " + tooShort + " -o  " + output + "temp.fastq"
+    #os.system(cutadapt3Prime)
+
 
 
 def run_dada2(input, output):
@@ -33,7 +43,9 @@ def main(input, primers, taxmethod, taxreference):
     # trim primers
     base = os.path.basename(input).replace('.fastq.gz', '')
     trimmed = f'{TMP}/{base}_trimmed.fastq'
-    trim_primers(input, primers, trimmed)
+    adapterless = f'{TMP}/{base}_untrimmed.fastq'
+    tooShort = trimmed = f'{TMP}/{base}_tooShort.fastq'
+    trim_primers(input, primers, trimmed, adapterless, tooShort)
 
     # dada2 asv identification
     asv = f'{TMP}/{base}_asv.csv'
