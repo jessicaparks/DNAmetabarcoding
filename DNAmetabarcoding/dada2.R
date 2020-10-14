@@ -37,8 +37,10 @@ dadaresult <- dada(
 )
 
 # create sequence table and remove chimeras
+samplelist <- list(dadaresult)
+names(samplelist) <- c(samplename)
 seqtab <- makeSequenceTable(
-    samples = list(samplename=dadaresult)
+    samples = samplelist
 )
 seqtab.nochim <- removeBimeraDenovo(
     unqs = seqtab,
@@ -47,6 +49,10 @@ seqtab.nochim <- removeBimeraDenovo(
     verbose = TRUE
 )
 
-# write sequence table to file
+# transpose sequence table and write to file
+# data is now in columns named 'sequence' and 'abundance'
+df <- t(seqtab.nochim)
+df <- cbind(rownames(df), data.frame(df, row.names=NULL))
+names(df) <- c('sequence', 'abundance')
 dir.create(dirname(output), showWarnings=FALSE, recursive=TRUE)
-write.csv(seqtab.nochim, output, row.names=FALSE)
+write.csv(df, output)
