@@ -6,3 +6,4 @@ dependencies:
   - python=3.8.5
   - click=7.1.2
   - bioconductor-dada2=1.16.0
+  - bioconductor-decipher=2.16.0
