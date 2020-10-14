@@ -14,11 +14,11 @@ def trim_primers(input, output, adapterless, tooShort, forwardprimers, reversepr
     #shutil.copy(input, output)
     
     #run cutAdapt to trim 5' end
-    cutadapt5Prime = "cutadapt.exe -g file:" + forwardprimers + " -e=0.25 --untrimmed-output " + adapterless + " -o temp.fastq " + input
+    cutadapt5Prime = "cutadapt -g file:" + forwardprimers + " -e=0.25 --untrimmed-output " + adapterless + f" -o {TMP}/temp.fastq " + input
     os.system(cutadapt5Prime)
 
     #run cutAdapt to trim 3' end
-    cutadapt3Prime = "cutadapt.exe -a file:" + reverseprimers + " -e=0.25 -m=50 --too-short-output " + tooShort + " -o  " + output + " temp.fastq"
+    cutadapt3Prime = "cutadapt -a file:" + reverseprimers + " -e=0.25 -m=50 --too-short-output " + tooShort + " -o  " + output + f" {TMP}/temp.fastq"
     os.system(cutadapt3Prime)
 
 def run_dada2(input, output):
@@ -45,7 +45,7 @@ def main(input, primers, taxmethod, taxreference):
     fh = open(primers, "r")
     
     #prep forward primer file(add ^ to the start of each sequence)
-    fhforward = open("forwardprimerstemp.fasta", "w")
+    fhforward = open(f"{TMP}/forwardprimerstemp.fasta", "w")
     for line in fh:
         if line.startswith(">") or line == "\n":
             fhforward.write(line)
@@ -56,7 +56,7 @@ def main(input, primers, taxmethod, taxreference):
 
     #prep reverse primer file(make reverse compliments and add X to the 3' end)
     fh = open(primers, "r")
-    fhreverse = open("reverseprimerstemp.fasta", "w")
+    fhreverse = open(f"{TMP}/reverseprimerstemp.fasta", "w")
     for line in fh:
         if line.startswith(">") or line == "\n":
             fhreverse.write(line)
@@ -73,7 +73,7 @@ def main(input, primers, taxmethod, taxreference):
     tooShort = f'{TMP}/{base}_tooShort.fastq'
     
     #trim primers
-    trim_primers(input, trimmed, adapterless, tooShort, "forwardprimerstemp.fasta", "reverseprimerstemp.fasta")
+    trim_primers(input, trimmed, adapterless, tooShort, f"{TMP}/forwardprimerstemp.fasta", f"{TMP}/reverseprimerstemp.fasta")
 
     # dada2 asv identification
     asv = f'{TMP}/{base}_asv.csv'
