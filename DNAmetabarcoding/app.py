@@ -100,10 +100,11 @@ def main(input, primers, taxmethod, taxreference):
         fh = open(asv, "r")
         sequences = open(asv_fasta, "w")
         for line in fh:
-            if line.startswith(",") or line == "\n":
+            if line.startswith("\"\",):
                 pass
             else:
-                data = line.split(",")
+                data = line.strip("\"")
+                data = data.split(",")
                 sequences.write(">" + data[0] + "\n" + data[1] + "\n")
         sequences.close()
         fh.close()
