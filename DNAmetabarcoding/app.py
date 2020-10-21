@@ -118,10 +118,6 @@ def main(input, primers, taxmethod, taxreference):
         taxa = f'{TMP}/{base}_taxa.csv'
         idtaxa_taxonomy(asv, taxa, refs[taxreference])
 
-    # via blast
-    if taxmethod == 'BLAST':
-        pass
-
     # filter data
 
     # output table
