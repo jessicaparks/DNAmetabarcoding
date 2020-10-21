@@ -100,7 +100,7 @@ def main(input, primers, taxmethod, taxreference):
         fh = open(asv, "r")
         sequences = open(asv_fasta, "w")
         for line in fh:
-            if line.startswith("\"\",):
+            if line.startswith("\"\","):
                 pass
             else:
                 data = line.strip("\"")
