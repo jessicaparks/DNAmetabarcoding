@@ -33,6 +33,18 @@ def idtaxa_taxonomy(input, output, reference):
     subprocess.check_call(['Rscript', 'idtaxa_taxonomy.R', input, output, reference])
 
 
+def run_blast(input, output):
+    subprocess.check_call([
+        'blastn',
+        '-db', '/gpfs_partners/databases/ncbi/blast/nt',
+        '-query', input,
+        '-max_target_seqs', '50',
+        '-num_threads', '8',
+        '-outfmt', "'6 qacc sacc qlen slen pident length qcovs staxid ssciname'",
+        '-out', output
+    ])
+
+
 @click.command()
 @click.option('-i', '--input', type=click.Path(exists=True), required=True)
 @click.option('--primers', type=click.Path(exists=True), required=True)
@@ -82,7 +94,10 @@ def main(input, primers, taxmethod, taxreference):
     # taxonomic classification
     # via blast
     if taxmethod == 'BLAST':
-        pass
+
+        asv_fasta = f'{TMP}/{base}_asv.fasta'
+        blast_results = f'{TMP}/{base}_blast.tsv'
+        run_blast(asv_fasta, blast_results)
 
     # via dada2
     if taxmethod == 'DADA2':
