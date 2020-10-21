@@ -94,9 +94,21 @@ def main(input, primers, taxmethod, taxreference):
     # taxonomic classification
     # via blast
     if taxmethod == 'BLAST':
-
+        #prep input files
         asv_fasta = f'{TMP}/{base}_asv.fasta'
         blast_results = f'{TMP}/{base}_blast.tsv'
+        fh = open(asv, "r")
+        sequences = open(asv_fasta, "w")
+        for line in fh:
+            if line.startswith(",") or line == "\n":
+                pass
+            else:
+                data = line.split(",")
+                sequences.write(">" + data[0] + "\n" + data[1] + "\n")
+        sequences.close()
+        fh.close()
+        
+        #run blast
         run_blast(asv_fasta, blast_results)
 
     # via dada2
