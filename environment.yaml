@@ -1,5 +1,4 @@
 name: dnametabarcoding
-prefix: /usr/local/usrapps/trnL_blast/dnametabarcoding
 channels:
   - bioconda
 dependencies:
