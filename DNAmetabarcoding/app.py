@@ -103,7 +103,7 @@ def main(input, primers, taxmethod, taxreference):
             if line.startswith("\"\","):
                 pass
             else:
-                data = line.strip("\"")
+                data = line.replace("\"","")
                 data = data.split(",")
                 sequences.write(">" + data[0] + "\n" + data[1] + "\n")
         sequences.close()
