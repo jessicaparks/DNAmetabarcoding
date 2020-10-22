@@ -4,10 +4,16 @@ import click
 import os
 import shutil
 import subprocess
+import pandas as pd
 from Bio.Seq import Seq
 
 TMP = '/share/trnL_blast/tmp'
 os.makedirs(TMP, exist_ok=True)
+
+# blast filtering thresholds
+EVALUE = 0.001
+IDENTITY = 95
+COVERAGE = 90
 
 
 def trim_primers(input, output, adapterless, tooShort, forwardprimers, reverseprimers):
@@ -38,7 +44,9 @@ def run_blast(input, output):
         'blastn',
         '-db', '/gpfs_partners/databases/ncbi/blast/nt/nt',
         '-query', input,
-        '-max_target_seqs', '50',
+        '-max_target_seqs', '10',
+        '-evalue', EVALUE,
+        '-perc_identity', IDENTITY,
         '-num_threads', '8',
         '-outfmt', '6 qacc sacc qlen slen pident length qcovs staxid',
         '-out', output
@@ -111,6 +119,12 @@ def main(input, primers, taxmethod, taxreference):
         
         #run blast
         run_blast(asv_fasta, blast_results)
+
+        #filter blast results
+        blast_header = ['qacc', 'sacc', 'qlen', 'slen', 'pident', 'length', 'qcovs', 'staxid']
+        blast_data = pd.read_csv(blast_results, header=None, names=blast_header)
+        blast_data = blast_data[blast_data['qcovs']>=COVERAGE].reset_index(drop=True)
+        
 
     # via dada2
     if taxmethod == 'DADA2':
