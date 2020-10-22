@@ -40,7 +40,7 @@ def run_blast(input, output):
         '-query', input,
         '-max_target_seqs', '50',
         '-num_threads', '8',
-        '-outfmt', '6 qacc sacc qlen slen pident length qcovs staxid ssciname',
+        '-outfmt', '6 qacc sacc qlen slen pident length qcovs staxid',
         '-out', output
     ])
 
