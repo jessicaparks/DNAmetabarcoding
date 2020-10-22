@@ -129,7 +129,7 @@ def main(input, primers, taxmethod, taxreference):
             blast_data.groupby('qacc')[['pident', 'qcovs']].max().reset_index(),
             blast_data,
             on=['qacc', 'pident', 'qcovs'],
-            how='left'
+            how='inner'
         )
         top_blast_data.to_csv('test_blast_filtered_results.csv', index=False)
 
