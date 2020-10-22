@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import pandas as pd
 from Bio.Seq import Seq
+from pytaxize import ncbi
 
 TMP = '/share/trnL_blast/tmp'
 os.makedirs(TMP, exist_ok=True)
@@ -45,8 +46,8 @@ def run_blast(input, output):
         '-db', '/gpfs_partners/databases/ncbi/blast/nt/nt',
         '-query', input,
         '-max_target_seqs', '10',
-        '-evalue', EVALUE,
-        '-perc_identity', IDENTITY,
+        '-evalue', str(EVALUE),
+        '-perc_identity', str(IDENTITY),
         '-num_threads', '8',
         '-outfmt', '6 qacc sacc qlen slen pident length qcovs staxid',
         '-out', output
@@ -124,7 +125,13 @@ def main(input, primers, taxmethod, taxreference):
         blast_header = ['qacc', 'sacc', 'qlen', 'slen', 'pident', 'length', 'qcovs', 'staxid']
         blast_data = pd.read_csv(blast_results, header=None, names=blast_header)
         blast_data = blast_data[blast_data['qcovs']>=COVERAGE].reset_index(drop=True)
-        
+        top_blast_data = pd.merge(
+            blast_data.groupby('qacc')[['pident', 'qcovs']].max().reset_index(),
+            blast_data,
+            on=['qacc', 'pident', 'qcovs'],
+            how='left'
+        )
+        top_blast_data.to_csv('test_blast_filtered_results.csv', index=False)
 
     # via dada2
     if taxmethod == 'DADA2':
