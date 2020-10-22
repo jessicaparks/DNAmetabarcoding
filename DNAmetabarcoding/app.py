@@ -126,9 +126,9 @@ def main(input, primers, taxmethod, taxreference):
         blast_data = pd.read_csv(blast_results, header=None, names=blast_header, sep='\t')
         blast_data = blast_data[blast_data['qcovs']>=COVERAGE].reset_index(drop=True)
         top_blast_data = pd.merge(
-            blast_data.groupby('qacc')[['pident', 'qcovs']].max().reset_index(),
+            blast_data.groupby('qacc')[['pident']].max().reset_index(),
             blast_data,
-            on=['qacc', 'pident', 'qcovs'],
+            on=['qacc', 'pident'],
             how='inner'
         )
         top_blast_data.to_csv('test_blast_filtered_results.csv', index=False)
