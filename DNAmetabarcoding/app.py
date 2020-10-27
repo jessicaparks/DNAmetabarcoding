@@ -132,6 +132,30 @@ def main(input, primers, taxmethod, taxreference):
             how='inner'
         )
         top_blast_data.to_csv('test_blast_filtered_results.csv', index=False)
+        
+        #look up taxa
+        staxids = top_blast_data['staxid'].unique().tolist()
+        taxa = (
+            pd.DataFrame(
+                [[x[0],y['Rank'],y['ScientificName']]
+                  for x in ncbi.hierarchy(ids=staxids).items()
+                  for y in x[1] if y['Rank'] in ranks],
+                columns=['staxid', 'rank', 'scientificname']
+            )
+            .pivot(index='staxid', columns='rank', values='scientificname')
+            .reset_index()
+        )
+        top_blast_data = (
+            pd.merge(
+                top_blast_data[['qacc', 'staxid']],
+                taxa,
+                on='staxid',
+                how='left'
+            )
+            .drop('staxid', axis=1)
+            .drop_duplicates()
+            .reset_index(drop=True)
+        )
 
     # via dada2
     if taxmethod == 'DADA2':
