@@ -163,6 +163,31 @@ def main(input, primers, taxmethod, taxreference, entrezkey):
             .reset_index(drop=True)
         )
 
+        #keep taxa from BLAST only down to the last consistent rank
+        def consistent_taxa(x):
+            new_taxa = {'qacc': x['qacc'].unique().tolist()[0]}
+            stop = 0
+            for r in ranks:
+                r_taxa = x[r].dropna().unique().tolist()
+                if len(r_taxa) == 1:
+                    new_taxa[r] = r_taxa[0]
+                else:
+                    stop += 1
+                if stop > 0:
+                    new_taxa[r] = None
+            return(new_taxa)
+        final_taxa = pd.DataFrame.from_dict(
+            top_blast_data.groupby('qacc')
+            .apply(lambda x: get_taxa(x))
+            .to_list()
+        )
+        blast_taxonomy = pd.merge(
+            pd.read_csv(asv, index_col=0).reset_index(),
+            final_taxa.rename(columns={'qacc': 'index'}),
+            on='index',
+            how='left'
+        )
+
     # via dada2
     if taxmethod == 'DADA2':
         refs = {
