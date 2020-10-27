@@ -139,6 +139,7 @@ def main(input, primers, taxmethod, taxreference, entrezkey):
         top_blast_data.to_csv('test_blast_filtered_results.csv', index=False)
         
         #look up taxa
+        ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
         staxids = top_blast_data['staxid'].unique().tolist()
         taxa = (
             pd.DataFrame(
