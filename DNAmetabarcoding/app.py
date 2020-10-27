@@ -107,7 +107,7 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey):
     if taxmethod == 'BLAST':
         #read entrez key
         with open(entrezkey) as f:
-            os.environ['ENTREZ_KEY'] = f.read()
+            os.environ['ENTREZ_KEY'] = f.read().strip()
 
         #prep input files
         asv_fasta = f'{TMP}/{base}_asv.fasta'
@@ -179,7 +179,7 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey):
             return(new_taxa)
         final_taxa = pd.DataFrame.from_dict(
             top_blast_data.groupby('qacc')
-            .apply(lambda x: get_taxa(x))
+            .apply(lambda x: consistent_taxa(x))
             .to_list()
         )
         output_data = pd.merge(
