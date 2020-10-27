@@ -59,7 +59,8 @@ def run_blast(input, output):
 @click.option('--primers', type=click.Path(exists=True), required=True)
 @click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2', 'IDTAXA'], case_sensitive=False), required=True)
 @click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
-def main(input, primers, taxmethod, taxreference):
+@click.option('--entrezkey', type=click.Path(exists=True))
+def main(input, primers, taxmethod, taxreference, entrezkey):
 
     # set file path name
     base = os.path.basename(input).replace('.fastq.gz', '')
@@ -103,6 +104,10 @@ def main(input, primers, taxmethod, taxreference):
     # taxonomic classification
     # via blast
     if taxmethod == 'BLAST':
+        #read entrez key
+        with open(entrezkey) as f:
+            os.environ['ENTREZ_KEY'] = f.read()
+
         #prep input files
         asv_fasta = f'{TMP}/{base}_asv.fasta'
         blast_results = f'{TMP}/{base}_blast.tsv'
