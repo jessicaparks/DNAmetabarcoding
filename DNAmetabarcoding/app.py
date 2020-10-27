@@ -207,8 +207,6 @@ def main(input, primers, taxmethod, taxreference, entrezkey):
         taxa = f'{TMP}/{base}_taxa.csv'
         idtaxa_taxonomy(asv, taxa, refs[taxreference])
 
-    # filter data
-
     # output table
 
 
