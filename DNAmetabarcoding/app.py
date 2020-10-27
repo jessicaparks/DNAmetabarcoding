@@ -56,11 +56,12 @@ def run_blast(input, output):
 
 @click.command()
 @click.option('-i', '--input', type=click.Path(exists=True), required=True)
+@click.option('-o', '--output', type=click.Path(exists=False), required=True)
 @click.option('--primers', type=click.Path(exists=True), required=True)
 @click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2', 'IDTAXA'], case_sensitive=False), required=True)
 @click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
 @click.option('--entrezkey', type=click.Path(exists=True))
-def main(input, primers, taxmethod, taxreference, entrezkey):
+def main(input, output, primers, taxmethod, taxreference, entrezkey):
 
     # set file path name
     base = os.path.basename(input).replace('.fastq.gz', '')
@@ -181,7 +182,7 @@ def main(input, primers, taxmethod, taxreference, entrezkey):
             .apply(lambda x: get_taxa(x))
             .to_list()
         )
-        blast_taxonomy = pd.merge(
+        output_data = pd.merge(
             pd.read_csv(asv, index_col=0).reset_index(),
             final_taxa.rename(columns={'qacc': 'index'}),
             on='index',
@@ -197,6 +198,13 @@ def main(input, primers, taxmethod, taxreference, entrezkey):
         }
         taxa = f'{TMP}/{base}_taxa.csv'
         dada2_taxonomy(asv, taxa, refs[taxreference])
+        output_data = pd.merge(
+            pd.read_csv(asv, index_col=0).reset_index(),
+            pd.read_csv(taxa, index_col=0).reset_index().rename(columns={'index': 'sequence'}),
+            on='sequence',
+            how='left'
+        )
+        output_data.rename(columns={c: c.lower() for c in output_data.columns}, inplace=True)
 
     # via idtaxa
     if taxmethod == 'IDTAXA':
@@ -208,7 +216,7 @@ def main(input, primers, taxmethod, taxreference, entrezkey):
         idtaxa_taxonomy(asv, taxa, refs[taxreference])
 
     # output table
-
+    output_data.to_csv(output, index=False)
 
 if __name__ == '__main__':
     main()
