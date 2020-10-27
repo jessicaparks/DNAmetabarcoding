@@ -36,10 +36,6 @@ def dada2_taxonomy(input, output, reference):
     subprocess.check_call(['Rscript', 'dada2_taxonomy.R', input, output, reference])
 
 
-def idtaxa_taxonomy(input, output, reference):
-    subprocess.check_call(['Rscript', 'idtaxa_taxonomy.R', input, output, reference])
-
-
 def run_blast(input, output):
     subprocess.check_call([
         'blastn',
@@ -58,8 +54,8 @@ def run_blast(input, output):
 @click.option('-i', '--input', type=click.Path(exists=True), required=True)
 @click.option('-o', '--output', type=click.Path(exists=False), required=True)
 @click.option('--primers', type=click.Path(exists=True), required=True)
-@click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2', 'IDTAXA'], case_sensitive=False), required=True)
-@click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
+@click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2'], case_sensitive=False), required=True)
+@click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
 @click.option('--entrezkey', type=click.Path(exists=True))
 def main(input, output, primers, taxmethod, taxreference, entrezkey):
 
@@ -205,15 +201,6 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey):
             how='left'
         )
         output_data.rename(columns={c: c.lower() for c in output_data.columns}, inplace=True)
-
-    # via idtaxa
-    if taxmethod == 'IDTAXA':
-        refs = {
-            'GTDB': '/share/trnL_blast/idtaxa-reference/GTDB_r95-mod_August2020.RData',
-            'UNITE': '/share/trnL_blast/idtaxa-reference/UNITE_v2020_February2020.RData'
-        }
-        taxa = f'{TMP}/{base}_taxa.csv'
-        idtaxa_taxonomy(asv, taxa, refs[taxreference])
 
     # output table
     output_data.to_csv(output, index=False)
