@@ -36,10 +36,10 @@ def dada2_taxonomy(input, output, reference):
     subprocess.check_call(['Rscript', 'dada2_taxonomy.R', input, output, reference])
 
 
-def run_blast(input, output):
+def run_blast(input, output, database):
     subprocess.check_call([
         'blastn',
-        '-db', '/gpfs_partners/databases/ncbi/blast/nt/nt',
+        '-db', database,
         '-query', input,
         '-max_target_seqs', '10',
         '-evalue', str(EVALUE),
@@ -56,8 +56,9 @@ def run_blast(input, output):
 @click.option('--primers', type=click.Path(exists=True), required=True)
 @click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2'], case_sensitive=False), required=True)
 @click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
+@click.option('--blastdatabase', default='/gpfs_partners/databases/ncbi/blast/nt/nt')
 @click.option('--entrezkey', type=click.Path(exists=True))
-def main(input, output, primers, taxmethod, taxreference, entrezkey):
+def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdatabase):
 
     # set file path name
     base = os.path.basename(input).replace('.fastq.gz', '')
@@ -121,7 +122,7 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey):
         fh.close()
         
         #run blast
-        run_blast(asv_fasta, blast_results)
+        run_blast(asv_fasta, blast_results, blastdatabase)
 
         #filter blast results
         blast_header = ['qacc', 'sacc', 'qlen', 'slen', 'pident', 'length', 'qcovs', 'staxid']
