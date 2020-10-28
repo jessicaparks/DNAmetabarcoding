@@ -22,6 +22,10 @@ report_errors: false
 This will direct conda to store environments and packages at `/share/trnL_blast/conda/`. If you do not have this `.condarc` file, conda will attempt to store these files in your home directory, which has very limited space on the HPC. This will result in an error about running out of space.  
 
 ### The DNAmetabarcoding Conda environment
+To list the existing conda environments, run this command:  
+```bash
+conda env list
+```
 To create the conda environment, you can run the following command:  
 (This should either be run from the location of the `environment.yaml` file or use the path to that file.)  
 ```bash
