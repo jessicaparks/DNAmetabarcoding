@@ -2,14 +2,39 @@
 
 
 ### Setting up your environment on Henry2
-The DNAmetabarcoding program uses a conda environment. To enable conda access on the HPC, you should run the following two commands and then log out and log back in. This will only need to be done once. For more details on conda setup on use on Henry2, see https://projects.ncsu.edu/hpc/Software/Apps.php?app=Conda. You may need to complete additional steps from these instructions if you want to create or edit the Conda environment.  
+The DNAmetabarcoding program uses a conda environment. To enable conda access on the HPC, you should run the following two commands and then log out and log back in. This will only need to be done once. For more details on conda setup on use on Henry2, see https://projects.ncsu.edu/hpc/Software/Apps.php?app=Conda.  
 ```bash
 module load conda
 conda init tcsh
 ```
+You will need to complete this additional step (also detailed in the instructions at https://projects.ncsu.edu/hpc/Software/Apps.php?app=Conda) if you want to create or edit the Conda environment. Create a file in your home directory named `.condarc`, with the following contents:  
+```bash
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+envs_dirs:
+  - /share/trnL_blast/conda/envs
+pkgs_dirs:
+  - /share/trnL_blast/conda/pkgs
+report_errors: false
+```
+This will direct conda to store environments and packages at `/share/trnL_blast/conda/`. If you do not have this `.condarc` file, conda will attempt to store these files in your home directory, which has very limited space on the HPC. This will result in an error about running out of space.  
 
 ### The DNAmetabarcoding Conda environment
-
+To list the existing conda environments, run this command:  
+```bash
+conda env list
+```
+To create the conda environment, you can run the following command:  
+(This should either be run from the location of the `environment.yaml` file or use the path to that file.)  
+```bash
+conda env create -f environment.yaml
+```
+To update the conda environment, you can run this command:  
+```bash
+conda env update -f environment.yaml
+```
 
 ### Running the DNAmetabarcoding program
 
