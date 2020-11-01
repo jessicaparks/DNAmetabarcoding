@@ -6,7 +6,6 @@ The DNAmetabarcoding program uses a conda environment. To enable conda access on
 ```bash
 module load conda
 conda init tcsh
-conda init bash
 ```
 You will need to complete this additional step (also detailed in the instructions at https://projects.ncsu.edu/hpc/Software/Apps.php?app=Conda) if you want to create or edit the Conda environment. Create a file in your home directory named `.condarc`, with the following contents:  
 ```bash
