@@ -36,7 +36,7 @@ def dada2_taxonomy(input, output, reference):
     subprocess.check_call(['Rscript', 'dada2_taxonomy.R', input, output, reference])
 
 
-def run_blast(input, output, database):
+def run_blast(input, output, database, threads):
     subprocess.check_call([
         'blastn',
         '-db', database,
@@ -44,7 +44,7 @@ def run_blast(input, output, database):
         '-max_target_seqs', '10',
         '-evalue', str(EVALUE),
         '-perc_identity', str(IDENTITY),
-        '-num_threads', '8',
+        '-num_threads', str(threads),
         '-outfmt', '6 qacc sacc qlen slen pident length qcovs staxid',
         '-out', output
     ])
@@ -58,7 +58,8 @@ def run_blast(input, output, database):
 @click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
 @click.option('--blastdatabase', default='/gpfs_partners/databases/ncbi/blast/nt/nt')
 @click.option('--entrezkey', type=click.Path(exists=True))
-def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdatabase):
+@click.option('--threads', type=int, default=4, show_default=True)
+def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdatabase, threads):
 
     # set file path name
     base = os.path.basename(input).replace('.fastq.gz', '')
@@ -122,7 +123,7 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdataba
         fh.close()
         
         #run blast
-        run_blast(asv_fasta, blast_results, blastdatabase)
+        run_blast(asv_fasta, blast_results, blastdatabase, threads)
 
         #filter blast results
         blast_header = ['qacc', 'sacc', 'qlen', 'slen', 'pident', 'length', 'qcovs', 'staxid']
@@ -134,7 +135,6 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdataba
             on=['qacc', 'pident'],
             how='inner'
         )
-        top_blast_data.to_csv('test_blast_filtered_results.csv', index=False)
         
         #look up taxa
         ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
@@ -189,9 +189,9 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdataba
     # via dada2
     if taxmethod == 'DADA2':
         refs = {
-            'GTDB': '/share/trnL_blast/dada2-reference/GTDB.fasta',
-            'UNITE_fungi': '/share/trnL_blast/dada2-reference/UNITE_fungi.fasta',
-            'UNITE_eukaryote': '/share/trnL_blast/dada2-reference/UNITE_eukaryote.fasta'
+            'GTDB': '/usr/local/usrapps/trnL_blast/dada2_taxonomy/GTDB.fasta',
+            'UNITE_fungi': '/usr/local/usrapps/trnL_blast/dada2_taxonomy/UNITE_fungi.fasta',
+            'UNITE_eukaryote': '/usr/local/usrapps/trnL_blast/dada2_taxonomy/UNITE_eukaryote.fasta'
         }
         taxa = f'{TMP}/{base}_taxa.csv'
         dada2_taxonomy(asv, taxa, refs[taxreference])
