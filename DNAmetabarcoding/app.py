@@ -6,7 +6,6 @@ import shutil
 import subprocess
 import pandas as pd
 from Bio.Seq import Seq
-from pytaxize import ncbi
 
 TMP = '/share/trnL_blast/tmp'
 os.makedirs(TMP, exist_ok=True)
@@ -50,6 +49,10 @@ def run_blast(input, output, database, threads):
     ])
 
 
+def run_taxize(input, output):
+    subprocess.check_call(['Rscript', 'taxizedb.R', input, output])
+
+
 @click.command()
 @click.option('-i', '--input', type=click.Path(exists=True), required=True)
 @click.option('-o', '--output', type=click.Path(exists=False), required=True)
@@ -57,7 +60,6 @@ def run_blast(input, output, database, threads):
 @click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2'], case_sensitive=False), required=True)
 @click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
 @click.option('--blastdatabase', default='/gpfs_partners/databases/ncbi/blast/nt/nt')
-@click.option('--entrezkey', type=click.Path(exists=True))
 @click.option('--threads', type=int, default=4, show_default=True)
 def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdatabase, threads):
 
@@ -103,10 +105,6 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdataba
     # taxonomic classification
     # via blast
     if taxmethod == 'BLAST':
-        #read entrez key
-        with open(entrezkey) as f:
-            os.environ['ENTREZ_KEY'] = f.read().strip()
-
         #prep input files
         asv_fasta = f'{TMP}/{base}_asv.fasta'
         blast_results = f'{TMP}/{base}_blast.tsv'
@@ -138,25 +136,25 @@ def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdataba
         
         #look up taxa
         ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
-        staxids = top_blast_data['staxid'].unique().tolist()
+        taxid_list = f'{TMP}/{base}_taxids.csv'
+        top_blast_data[['staxid']].drop_duplicates().to_csv(taxid_list, header=False, index=False)
+        taxize_results = f'{TMP}/{base}_taxa.csv'
+        run_taxize(taxid_list, taxize_results)
+        taxa = pd.read_csv(taxize_results)
         taxa = (
-            pd.DataFrame(
-                [[x[0],y['Rank'],y['ScientificName']]
-                  for x in ncbi.hierarchy(ids=staxids).items()
-                  for y in x[1] if y['Rank'] in ranks],
-                columns=['staxid', 'rank', 'scientificname']
-            )
-            .pivot(index='staxid', columns='rank', values='scientificname')
+            taxa[taxa['rank'].isin(ranks)]
+            .pivot(index='taxid', columns='rank', values='name')
             .reset_index()
         )
         top_blast_data = (
             pd.merge(
                 top_blast_data[['qacc', 'staxid']],
                 taxa,
-                on='staxid',
+                left_on='staxid',
+                right_on='taxid',
                 how='left'
             )
-            .drop('staxid', axis=1)
+            .drop(['staxid', 'taxid'], axis=1)
             .drop_duplicates()
             .reset_index(drop=True)
         )
