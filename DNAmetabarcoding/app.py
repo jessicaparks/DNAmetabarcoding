@@ -61,7 +61,7 @@ def run_taxize(input, output):
 @click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
 @click.option('--blastdatabase', default='/gpfs_partners/databases/ncbi/blast/nt/nt')
 @click.option('--threads', type=int, default=4, show_default=True)
-def main(input, output, primers, taxmethod, taxreference, entrezkey, blastdatabase, threads):
+def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads):
 
     # set file path name
     base = os.path.basename(input).replace('.fastq.gz', '')
