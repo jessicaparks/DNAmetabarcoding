@@ -2,7 +2,6 @@ name: dnametabarcoding
 channels:
   - bioconda
   - conda-forge
-  - jlparks4
 dependencies:
   - python=3.8.5
   - click=7.1.2
