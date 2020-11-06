@@ -6,11 +6,12 @@ conda activate /usr/local/usrapps/trnL_blast/conda/envs/dnametabarcoding
 # set the input list file,  output directory, the primer fasta file, and the NCBI entrez key file
 set filelist = /share/trnL_blast/data/ITS2_list.txt
 set outdir = /share/trnL_blast/data/ITS2_results
-set primers = /share/trnL_blast/data/primers.fasta
+set primers = /share/trnL_blast/data/ITS2_primers.fasta
 set keyfile = $HOME/entrez_key.txt
+mkdir -p $outdir
 
 # submit a job to the cluster for each input file
-foreach file ( cat $filelist )
+foreach file ( `cat $filelist` )
   set filename = `basename $file .fastq.gz`
   bsub \
     -J $filename \
