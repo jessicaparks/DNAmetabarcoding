@@ -2,7 +2,6 @@
 
 import click
 import os
-import shutil
 import subprocess
 import pandas as pd
 from Bio.Seq import Seq
@@ -17,8 +16,6 @@ COVERAGE = 90
 
 
 def trim_primers(input, output, adapterless, tooShort, forwardprimers, reverseprimers):
-    #shutil.copy(input, output)
-    
     #run cutAdapt to trim 5' end
     cutadapt5Prime = "cutadapt -g file:" + forwardprimers + " -e=0.25 --untrimmed-output " + adapterless + f" -o {TMP}/temp.fastq " + input
     os.system(cutadapt5Prime)
