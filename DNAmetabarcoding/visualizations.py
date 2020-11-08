@@ -3,9 +3,12 @@ import os
 import sys
 import glob
 import pandas as pd
+import subprocess
 
-
-def mergefiles(directory):
+def run_phyloseq(ASVfile, taxafile, taxalevel):
+    subprocess.check_call(['Rscript', 'phyloseq.R', ASVfile, taxafile, taxalevel])
+    
+def mergefiles(directory, taxalevel):
     #directory = directory + r"\*.csv"
     files = glob.glob(f'{directory}/*.csv')
     #print(directory)
@@ -58,6 +61,7 @@ def mergefiles(directory):
     # belonging to different taxa, and some of the data should be updated
     assert len(abundance) == len(taxa)
 
+    run_phyloseq('mergedASVdata.csv', 'mergedtaxadata.csv', taxalevel)
     #for counter, files in enumerate(glob.glob(directory)):
         #print(counter)
     #    if counter == 0:
@@ -78,5 +82,6 @@ def mergefiles(directory):
 
 if __name__ == "__main__":
     location = sys.argv[1]
-    mergefiles(location)
+    taxalevel = sys.argv[2]
+    mergefiles(location, taxalevel)
 
