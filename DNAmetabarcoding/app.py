@@ -4,7 +4,9 @@ import click
 import os
 import pandas as pd
 import subprocess
+from Bio import SeqIO
 from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 # blast filtering thresholds
 EVALUE = 0.001
@@ -25,14 +27,32 @@ TMP = f'/share/trnL_blast/{user}/tmp/dnametabarcoding'
 os.makedirs(TMP, exist_ok=True)
 
 
-def trim_primers(input, output, adapterless, tooShort, forwardprimers, reverseprimers):
+def parse_primers(input, fwd, rev):
+    # prep forward primer file (add ^ to the start of each sequence)
+    # prep reverse primer file (make reverse compliments and add X to the 3' end)
+    fwd_records = []
+    rev_records = []
+    for record in SeqIO.parse(input, 'fasta'):
+        fwd_records.append(
+            SeqRecord('^' + record.seq, id=record.id, description='')
+        )
+        rev_records.append(
+            SeqRecord(record.seq.reverse_complement() + 'X',
+                      id=record.id, description='')
+        )
+    SeqIO.write(fwd_records, fwd, 'fasta')
+    SeqIO.write(rev_records, rev, 'fasta')
+
+
+def trim_primers(input, output, adapterless, tooshort, forwardprimers, reverseprimers):
     #run cutAdapt to trim 5' end
     cutadapt5Prime = "cutadapt -g file:" + forwardprimers + " -e=0.25 --untrimmed-output " + adapterless + f" -o {TMP}/temp.fastq " + input
     os.system(cutadapt5Prime)
 
     #run cutAdapt to trim 3' end
-    cutadapt3Prime = "cutadapt -a file:" + reverseprimers + " -e=0.25 -m=50 --too-short-output " + tooShort + " -o  " + output + f" {TMP}/temp.fastq"
+    cutadapt3Prime = "cutadapt -a file:" + reverseprimers + " -e=0.25 -m=50 --too-short-output " + tooshort + " -o  " + output + f" {TMP}/temp.fastq"
     os.system(cutadapt3Prime)
+
 
 def run_dada2(input, output):
     subprocess.check_call(['Rscript', 'dada2.R', input, output])
@@ -70,40 +90,19 @@ def run_taxize(input, output):
 @click.option('--threads', type=int, default=4, show_default=True)
 def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads):
 
-    # set file path name
-    base = os.path.basename(input).replace('.fastq.gz', '')
-    fh = open(primers, "r")
+    # set input file base name
+    base = os.path.basename(input).replace('.gz', '').replace('.fastq', '')
     
-    #prep forward primer file(add ^ to the start of each sequence)
-    fhforward = open(f"{TMP}/forwardprimerstemp.fasta", "w")
-    for line in fh:
-        if line.startswith(">") or line == "\n":
-            fhforward.write(line)
-        else:
-            fhforward.write("^" + line)
-    fhforward.close()
-    fh.close()
-
-    #prep reverse primer file(make reverse compliments and add X to the 3' end)
-    fh = open(primers, "r")
-    fhreverse = open(f"{TMP}/reverseprimerstemp.fasta", "w")
-    for line in fh:
-        if line.startswith(">") or line == "\n":
-            fhreverse.write(line)
-        else:
-            seq = Seq(line.strip("\n"))
-            reverseSeq = seq.reverse_complement()
-            fhreverse.write(str(reverseSeq + "X" + "\n"))
-    fhreverse.close()
-    fh.close()
-    
-    #set file names for trimming
+    # set file names for primers and primer trimming
+    fwdprimers = f'{TMP}/{base}_forwardprimerstemp.fasta'
+    revprimers = f'{TMP}/{base}_reverseprimerstemp.fasta'
     trimmed = f'{TMP}/{base}_trimmed.fastq'
     adapterless = f'{TMP}/{base}_untrimmed.fastq'
-    tooShort = f'{TMP}/{base}_tooShort.fastq'
+    tooshort = f'{TMP}/{base}_tooShort.fastq'
     
-    #trim primers
-    trim_primers(input, trimmed, adapterless, tooShort, f"{TMP}/forwardprimerstemp.fasta", f"{TMP}/reverseprimerstemp.fasta")
+    # trim primers
+    parse_primers(primers, fwdprimers, revprimers)
+    trim_primers(input, trimmed, adapterless, tooshort, fwdprimers, revprimers)
 
     # dada2 asv identification
     asv = f'{TMP}/{base}_asv.csv'
