@@ -2,17 +2,27 @@
 
 import click
 import os
-import subprocess
 import pandas as pd
+import subprocess
 from Bio.Seq import Seq
-
-TMP = '/share/trnL_blast/tmp'
-os.makedirs(TMP, exist_ok=True)
 
 # blast filtering thresholds
 EVALUE = 0.001
 IDENTITY = 95
 COVERAGE = 90
+
+# dada2 taxonomy database paths
+base_dada2_tax = '/usr/local/usrapps/trnL_blast/dada2_taxonomy'
+dada2_tax_dbs = {
+    'GTDB': os.path.join(base_dada2_tax, 'GTDB.fasta'),
+    'UNITE_fungi': os.path.join(base_dada2_tax, 'UNITE_fungi.fasta'),
+    'UNITE_eukaryote': os.path.join(base_dada2_tax, 'UNITE_eukaryote.fasta')
+}
+
+# set temporary	directory for intermediate files
+user = os.environ['USER']
+TMP = f'/share/trnL_blast/{user}/tmp/dnametabarcoding'
+os.makedirs(TMP, exist_ok=True)
 
 
 def trim_primers(input, output, adapterless, tooShort, forwardprimers, reverseprimers):
@@ -55,7 +65,7 @@ def run_taxize(input, output):
 @click.option('-o', '--output', type=click.Path(exists=False), required=True)
 @click.option('--primers', type=click.Path(exists=True), required=True)
 @click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2'], case_sensitive=False), required=True)
-@click.option('--taxreference', type=click.Choice(['GTDB', 'UNITE_fungi', 'UNITE_eukaryote'], case_sensitive=False))
+@click.option('--taxreference', type=click.Choice(dada2_tax_dbs.keys(), case_sensitive=False))
 @click.option('--blastdatabase', default='/gpfs_partners/databases/ncbi/blast/nt/nt')
 @click.option('--threads', type=int, default=4, show_default=True)
 def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads):
@@ -183,13 +193,8 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
 
     # via dada2
     if taxmethod == 'DADA2':
-        refs = {
-            'GTDB': '/usr/local/usrapps/trnL_blast/dada2_taxonomy/GTDB.fasta',
-            'UNITE_fungi': '/usr/local/usrapps/trnL_blast/dada2_taxonomy/UNITE_fungi.fasta',
-            'UNITE_eukaryote': '/usr/local/usrapps/trnL_blast/dada2_taxonomy/UNITE_eukaryote.fasta'
-        }
         taxa = f'{TMP}/{base}_taxa.csv'
-        dada2_taxonomy(asv, taxa, refs[taxreference])
+        dada2_taxonomy(asv, taxa, dada2_tax_dbs[taxreference])
         output_data = pd.merge(
             pd.read_csv(asv, index_col=0).reset_index(),
             pd.read_csv(taxa, index_col=0).reset_index().rename(columns={'index': 'sequence'}),
@@ -198,8 +203,9 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
         )
         output_data.rename(columns={c: c.lower() for c in output_data.columns}, inplace=True)
 
-    # output table
+    # output table with ASVs, abundance, and taxonomy
     output_data.to_csv(output, index=False)
+    print(f'Results at {output}')
 
 if __name__ == '__main__':
     main()
