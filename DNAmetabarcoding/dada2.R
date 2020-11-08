@@ -1,10 +1,13 @@
 #!/usr/bin/env Rscript
 
+# load the DADA2 library
 library(dada2, quietly=TRUE)
 
+# get the input file path and output path from the arguments
 args <- commandArgs(trailingOnly = TRUE)
 file <- args[1]
 output <- args[2]
+# get the sample name from the input file path
 samplename <- gsub(pattern='.fastq.gz','',basename(file))
 
 # filter and trim the reads (DADA2 requires no Ns)
