@@ -13,6 +13,9 @@ EVALUE = 0.001
 IDENTITY = 95
 COVERAGE = 90
 
+# set taxonomy ranks to include (in order of increasing specificity)
+ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+
 # dada2 taxonomy database paths
 base_dada2_tax = '/usr/local/usrapps/trnL_blast/dada2_taxonomy'
 dada2_tax_dbs = {
@@ -110,10 +113,50 @@ def run_blast(input, output, database, threads):
 
 def run_taxize(input, output):
     subprocess.check_call(['Rscript', 'taxizedb.R', input, output])
+    taxa = pd.read_csv(output)
+    taxa = (
+        taxa[taxa['rank'].isin(ranks)]
+        .pivot(index='taxid', columns='rank', values='name')
+        .reset_index()
+    )
+    return taxa
 
 
-#def combine_blast_taxize():
+def consistent_taxa(x):
+    new_taxa = {'qacc': x['qacc'].unique().tolist()[0]}
+    stop = 0
+    for r in ranks:
+        r_taxa = x[r].dropna().unique().tolist()
+        if len(r_taxa) == 1:
+            new_taxa[r] = r_taxa[0]
+        else:
+            stop += 1
+        if stop > 0:
+            new_taxa[r] = None
+    return(new_taxa)
 
+
+def combine_blast_taxize(blast_data, taxa):
+    # merge blast results with taxize information
+    merged = (
+        pd.merge(
+            blast_data[['qacc', 'staxid']],
+            taxa,
+            left_on='staxid',
+            right_on='taxid',
+            how='left'
+        )
+        .drop(['staxid', 'taxid'], axis=1)
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    # keep taxa from BLAST only down to the last consistent rank
+    final_taxa = pd.DataFrame.from_dict(
+        merged.groupby('qacc')
+        .apply(lambda x: consistent_taxa(x))
+        .to_list()
+    )
+    return final_taxa
 
 
 @click.command()
@@ -155,49 +198,16 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
         blast_results = f'{TMP}/{base}_blast.tsv'
         blast_data = run_blast(asv_fasta, blast_results, blastdatabase, threads)
         
-        #look up taxa
-        ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+        # look up taxa
         taxid_list = f'{TMP}/{base}_taxids.csv'
         blast_data[['staxid']].drop_duplicates().to_csv(taxid_list, header=False, index=False)
         taxize_results = f'{TMP}/{base}_taxa.csv'
-        run_taxize(taxid_list, taxize_results)
-        taxa = pd.read_csv(taxize_results)
-        taxa = (
-            taxa[taxa['rank'].isin(ranks)]
-            .pivot(index='taxid', columns='rank', values='name')
-            .reset_index()
-        )
-        blast_data = (
-            pd.merge(
-                blast_data[['qacc', 'staxid']],
-                taxa,
-                left_on='staxid',
-                right_on='taxid',
-                how='left'
-            )
-            .drop(['staxid', 'taxid'], axis=1)
-            .drop_duplicates()
-            .reset_index(drop=True)
-        )
+        taxa = run_taxize(taxid_list, taxize_results)
 
-        #keep taxa from BLAST only down to the last consistent rank
-        def consistent_taxa(x):
-            new_taxa = {'qacc': x['qacc'].unique().tolist()[0]}
-            stop = 0
-            for r in ranks:
-                r_taxa = x[r].dropna().unique().tolist()
-                if len(r_taxa) == 1:
-                    new_taxa[r] = r_taxa[0]
-                else:
-                    stop += 1
-                if stop > 0:
-                    new_taxa[r] = None
-            return(new_taxa)
-        final_taxa = pd.DataFrame.from_dict(
-            blast_data.groupby('qacc')
-            .apply(lambda x: consistent_taxa(x))
-            .to_list()
-        )
+        # join blast and taxonomy information
+        final_taxa = combine_blast_taxize(blast_data, taxa)
+
+        # join blast taxonomy results with ASV data
         output_data = pd.merge(
             asv_data,
             final_taxa.rename(columns={'qacc': 'index'}),
@@ -209,17 +219,19 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     if taxmethod == 'DADA2':
         taxa = f'{TMP}/{base}_taxa.csv'
         dada2_taxonomy(asv, taxa, dada2_tax_dbs[taxreference])
+
+        # join dada2 taxonomy results with ASV data
         output_data = pd.merge(
             asv_data,
             pd.read_csv(taxa, index_col=0).reset_index().rename(columns={'index': 'sequence'}),
             on='sequence',
             how='left'
-        )
+        ).drop('index', axis=1)
         output_data.rename(columns={c: c.lower() for c in output_data.columns}, inplace=True)
 
     # output table with ASVs, abundance, and taxonomy
     output_data.to_csv(output, index=False)
-    print(f'Results at {output}')
+    print(f'Analysis complete. Results found at {output}')
 
 if __name__ == '__main__':
     main()
