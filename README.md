@@ -19,7 +19,7 @@ pkgs_dirs:
   - /usr/local/usrapps/trnL_blast/conda/pkgs
 report_errors: false
 ```
-This will direct conda to store environments and packages at `/share/trnL_blast/conda/`. If you do not have this `.condarc` file, conda will attempt to store these files in your home directory, which has very limited space on the HPC. This will result in an error about running out of space.  
+This will direct conda to store environments and packages at `/usr/local/usrapps/trnL_blast/conda/`. If you do not have this `.condarc` file, conda will attempt to store these files in your home directory, which has very limited space on the HPC. This will result in an error about running out of space.  
 
 ### The DNAmetabarcoding Conda environment
 To list the existing conda environments, run this command:  
@@ -41,7 +41,7 @@ conda env update -f environment.yaml
 
 ### Updating the nt BLAST database
 By default, this program uses the nt BLAST database hosted by Henry2. Documentation for BLAST databases available on Henry2 is found at https://projects.ncsu.edu/hpc/Software/Apps.php?app=BLAST. The nt database is found at `/gpfs_partners/databases/ncbi/blast/nt/nt`.  
-Users can optionally install and use their own copy of the nt database. To download the newest version of the nt BLAST database from NCBI, move to the `/share/trnL_blast/ncbi-reference/` directory and run the following commands.  
+Users can optionally install and use their own copy of the nt database. To download the newest version of the nt BLAST database from NCBI, move to the `/usr/local/usrapps/trnL_blast/ncbi` directory and run the following commands.  
 ```bash
 cd /usr/local/usrapps/trnL_blast/ncbi
 conda activate /usr/local/usrapps/trnL_blast/conda/envs/dnametabarcoding
