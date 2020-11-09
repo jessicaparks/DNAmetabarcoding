@@ -30,13 +30,13 @@ standf = function(x, t=total) round(t * (x / sum(x)))
 carbom = transform_sample_counts(carbom, standf)
 
 pdf("abundanceplot.pdf")
-plot_bar(carbom, fill = taxalevel)
+plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=taxalevel, fill=taxalevel), stat="identity", position="stack")
 dev.off()
 
 jpeg("abundanceplot.jpg")
-plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=taxalevel, fill=taxalevel), stat = stat_identity(), position="stack")
+plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=taxalevel, fill=taxalevel), stat="count", position="stack")
 dev.off()
 
 png("abundanceplot.png")
-plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=taxalevel, fill=taxalevel), stat="identity", position="stack")
+plot_bar(carbom, fill = taxalevel) + geom_bar(stat="identity", position="stack")
 dev.off()
