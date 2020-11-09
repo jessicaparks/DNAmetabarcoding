@@ -56,10 +56,19 @@ def trim_primers(input, output, adapterless, tooshort, forwardprimers, reversepr
 
 def run_dada2(input, output):
     subprocess.check_call(['Rscript', 'dada2.R', input, output])
+    return pd.read_csv(output, index_col=0).reset_index()
 
 
 def dada2_taxonomy(input, output, reference):
     subprocess.check_call(['Rscript', 'dada2_taxonomy.R', input, output, reference])
+
+
+def write_blast_fasta(data, output):
+    records = [
+        SeqRecord(Seq(x.sequence), id=str(x.index), description='')
+        for x in data.itertuples()
+    ]
+    SeqIO.write(records, output, 'fasta')
 
 
 def run_blast(input, output, database, threads):
@@ -78,6 +87,10 @@ def run_blast(input, output, database, threads):
 
 def run_taxize(input, output):
     subprocess.check_call(['Rscript', 'taxizedb.R', input, output])
+
+
+#def combine_blast_taxize():
+
 
 
 @click.command()
@@ -106,27 +119,17 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
 
     # dada2 asv identification
     asv = f'{TMP}/{base}_asv.csv'
-    run_dada2(trimmed, asv)
+    asv_data = run_dada2(trimmed, asv)
 
     # taxonomic classification
     # via blast
     if taxmethod == 'BLAST':
-        #prep input files
+        # prep input fasta file for blast
         asv_fasta = f'{TMP}/{base}_asv.fasta'
+        write_blast_fasta(asv_data, asv_fasta)
+
+        # run blast
         blast_results = f'{TMP}/{base}_blast.tsv'
-        fh = open(asv, "r")
-        sequences = open(asv_fasta, "w")
-        for line in fh:
-            if line.startswith("\"\","):
-                pass
-            else:
-                data = line.replace("\"","")
-                data = data.split(",")
-                sequences.write(">" + data[0] + "\n" + data[1] + "\n")
-        sequences.close()
-        fh.close()
-        
-        #run blast
         run_blast(asv_fasta, blast_results, blastdatabase, threads)
 
         #filter blast results
@@ -188,14 +191,14 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
             final_taxa.rename(columns={'qacc': 'index'}),
             on='index',
             how='left'
-        )
+        ).drop('index', axis=1)
 
     # via dada2
     if taxmethod == 'DADA2':
         taxa = f'{TMP}/{base}_taxa.csv'
         dada2_taxonomy(asv, taxa, dada2_tax_dbs[taxreference])
         output_data = pd.merge(
-            pd.read_csv(asv, index_col=0).reset_index(),
+            asv_data,
             pd.read_csv(taxa, index_col=0).reset_index().rename(columns={'index': 'sequence'}),
             on='sequence',
             how='left'
