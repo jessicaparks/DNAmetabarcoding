@@ -57,7 +57,7 @@ def parse_primers(input, fwd, rev):
     SeqIO.write(rev_records, rev, 'fasta')
 
 
-def trim_primers(input, output, adapterless, tooshort, forwardprimers,
+def trim_primers(input, output, primerless, tooshort, forwardprimers,
                  reverseprimers, samplename):
     """Trim primer sequences from the sequencing reads.
     The reads without a primer at the start of the read are excluded and
@@ -67,7 +67,7 @@ def trim_primers(input, output, adapterless, tooshort, forwardprimers,
     Arguments:
     input -- the fastq file containing the sequencing reads
     output -- the file path for the trimmed reads
-    adapterless -- the file path for the reads that do not have a primer
+    primerless -- the file path for the reads that do not have a primer
     tooshort -- the file path for the reads that are too short after trimming
     forwardprimers -- the file path for the forward primers, to be removed
       from the 5' end of the reads
@@ -80,7 +80,7 @@ def trim_primers(input, output, adapterless, tooshort, forwardprimers,
         'cutadapt',
         '-g', f'file:{forwardprimers}',
         '-e', '0.25', 
-        '--untrimmed-output', adapterless,
+        '--untrimmed-output', primerless,
         '-o', f'{TMP}/{samplename}_temp.fastq',
         input
     ])
@@ -310,20 +310,21 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     threads -- the threads/cpus to be used for running multithreaded tasks
     """
 
-    # set input file base name
+    # set input file base name and get output directory
     base = os.path.basename(input).replace('.gz', '').replace('.fastq', '')
+    outdir = os.path.dirname(output)
     
     # set file names for primers and primer trimming
     fwdprimers = f'{TMP}/{base}_forwardprimerstemp.fasta'
     revprimers = f'{TMP}/{base}_reverseprimerstemp.fasta'
     trimmed = f'{TMP}/{base}_trimmed.fastq'
-    adapterless = f'{TMP}/{base}_untrimmed.fastq'
-    tooshort = f'{TMP}/{base}_tooShort.fastq'
+    primerless = f'{outdir}/{base}_untrimmed.fastq'
+    tooshort = f'{outdir}/{base}_tooshort.fastq'
     
     # trim primers
     print('Trimming primers ...')
     parse_primers(primers, fwdprimers, revprimers)
-    trim_primers(input, trimmed, adapterless, tooshort, fwdprimers, revprimers, base)
+    trim_primers(input, trimmed, primerless, tooshort, fwdprimers, revprimers, base)
 
     # dada2 asv identification
     print('Identifying ASVs with DADA2 ...')
