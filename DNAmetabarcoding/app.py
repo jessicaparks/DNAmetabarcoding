@@ -76,6 +76,18 @@ def run_dada2(input, output):
 
 def dada2_taxonomy(input, output, reference):
     subprocess.check_call(['Rscript', 'dada2_taxonomy.R', input, output, reference])
+    # read taxonomy results
+    taxa = (
+        pd.read_csv(output, index_col=0)
+        .reset_index()
+        .rename(columns={'index': 'sequence'})
+    )
+    # change column names to lowercase
+    taxa.rename(columns={c: c.lower() for c in taxa.columns}, inplace=True)
+    # remove the prefix from the taxon names (ie. 'g__' for genus names)
+    for c in ranks:
+        taxa[c] = taxa[c].str.split('__').str[1]
+    return taxa
 
 
 def write_blast_fasta(data, output):
@@ -118,6 +130,12 @@ def run_taxize(input, output):
         taxa[taxa['rank'].isin(ranks)]
         .pivot(index='taxid', columns='rank', values='name')
         .reset_index()
+    )
+    # remove the genus portion that is included in the species name
+    taxa['species'] = taxa.apply(
+        lambda x:
+        x.species.replace(str(x.genus), '').strip(),
+        axis=1
     )
     return taxa
 
@@ -223,16 +241,15 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     if taxmethod == 'DADA2':
         print('Running DADA2 taxonomy classification ...')
         taxa = f'{TMP}/{base}_taxa.csv'
-        dada2_taxonomy(asv, taxa, dada2_tax_dbs[taxreference])
+        dada2_taxa = dada2_taxonomy(asv, taxa, dada2_tax_dbs[taxreference])
 
         # join dada2 taxonomy results with ASV data
         output_data = pd.merge(
             asv_data,
-            pd.read_csv(taxa, index_col=0).reset_index().rename(columns={'index': 'sequence'}),
+            dada2_taxa,
             on='sequence',
             how='left'
         ).drop('index', axis=1)
-        output_data.rename(columns={c: c.lower() for c in output_data.columns}, inplace=True)
 
     # output table with ASVs, abundance, and taxonomy
     output_data.to_csv(output, index=False)
