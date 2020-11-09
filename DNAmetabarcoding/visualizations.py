@@ -20,8 +20,8 @@ def run_phyloseq(asvfile, taxafile, taxalevel, plotfile):
 @click.option('-r', '--rank', type=click.Choice(ranks, case_sensitive=False), required=True)
 def main(directory, outputplot, rank):
     files = glob.glob(f'{directory}/*.csv')
-    outputdir = os.dirname(outputplot)
-    outputname = os.basename(outputplot).rsplit('.', 1)[0]
+    outputdir = os.path.dirname(outputplot)
+    outputname = os.path.basename(outputplot).rsplit('.', 1)[0]
     os.makedirs(outputdir, exist_ok=True)
 
     # abundance data by sequence for each sample
