@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
-library(phyloseq)
-library(ggplot2)
-library(dplyr)
+library(phyloseq, quietly=TRUE)
+library(ggplot2, quietly=TRUE)
+library(dplyr, quietly=TRUE)
 
 args <- commandArgs(trailingOnly = TRUE)
 ASVfile <- args[1]
