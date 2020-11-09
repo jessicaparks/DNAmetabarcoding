@@ -15,8 +15,8 @@ def run_phyloseq(asvfile, taxafile, taxalevel, plotfile):
 
 
 @click.command()
-@click.option('-d', '--directory', type=click.Path(exists=True), file_okay=False, required=True)
-@click.option('-o', '--outputplot', type=click.Path(exists=False), dir_okay=False, required=True)
+@click.option('-d', '--directory', type=click.Path(exists=True, file_okay=False), required=True)
+@click.option('-o', '--outputplot', type=click.Path(exists=False, dir_okay=False), required=True)
 @click.option('-r', '--rank', type=click.Choice(ranks, case_sensitive=False), required=True)
 def main(directory, outputplot, rank):
     files = glob.glob(f'{directory}/*.csv')
