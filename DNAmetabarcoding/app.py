@@ -96,17 +96,18 @@ def trim_primers(input, output, primerless, tooshort, forwardprimers,
     ])
 
 
-def run_dada2(input, output):
+def run_dada2(input, output, tempdir=TMP):
     """Run DADA2 on the input sequence reads to identify ASVs.
 
     Arguments:
     input -- the fastq file of sequencing reads
     output -- the file path for the DADA2 results
+    tempdir -- directory for temporary, intermediate files
 
     Returns:
     a dataframe of ASVs with the columns: index, sequence, and abundance
     """
-    subprocess.check_call(['Rscript', 'dada2.R', input, output])
+    subprocess.check_call(['Rscript', 'dada2.R', input, output, tempdir])
     return pd.read_csv(output, index_col=0).reset_index()
 
 

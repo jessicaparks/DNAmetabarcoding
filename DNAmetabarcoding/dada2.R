@@ -7,13 +7,15 @@ library(dada2, quietly=TRUE)
 args <- commandArgs(trailingOnly = TRUE)
 file <- args[1]
 output <- args[2]
+tempdir <- args[3]
 # get the sample name from the input file path
 samplename <- gsub(pattern='.fastq.gz','',basename(file))
 
 # filter and trim the reads (DADA2 requires no Ns)
+filteredreads <- cat(c(tempdir, '/', samplename, '_filtered.fastq.gz'), sep='')
 filterAndTrim(
     fwd = file,
-    filt = '/share/trnL_blast/tmp/filtered.fastq.gz',
+    filt = filteredreads,
     maxN = 0,
     maxEE = 2,
     truncQ = 2,
@@ -25,12 +27,12 @@ filterAndTrim(
 
 # learn the error rates
 err <- learnErrors(
-    fls = '/share/trnL_blast/tmp/filtered.fastq.gz',
+    fls = filteredreads,
     multithread = TRUE
 )
 
 # dereplicate identical reads
-derep <- derepFastq(fls = '/share/trnL_blast/tmp/filtered.fastq.gz')
+derep <- derepFastq(fls = filteredreads)
 
 # apply sample inference
 dadaresult <- dada(
