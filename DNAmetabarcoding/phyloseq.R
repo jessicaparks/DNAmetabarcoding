@@ -30,5 +30,19 @@ standf = function(x, t=total) round(t * (x / sum(x)))
 carbom = transform_sample_counts(carbom, standf)
 
 png("abundanceplot.png")
-plot_bar(carbom, fill = taxalevel) #+ geom_bar(aes(color=phylum, fill=phylum), stat="identity", position="stack")
+if(taxalevel == "kingdom"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=kingdom, fill=kingdom), stat="identity", position="stack")
+} else if(taxalevel == "phylum"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=phylum, fill=phylum), stat="identity", position="stack")
+} else if(taxalevel == "class"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=class, fill=class), stat="identity", position="stack")
+} else if(taxalevel == "order"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=order, fill=order), stat="identity", position="stack")
+} else if(taxalevel == "family"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=family, fill=family), stat="identity", position="stack")
+} else if(taxalevel == "genus"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=genus, fill=genus), stat="identity", position="stack")
+} else if(taxalevel == "species"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=species, fill=species), stat="identity", position="stack")
+}
 dev.off()
