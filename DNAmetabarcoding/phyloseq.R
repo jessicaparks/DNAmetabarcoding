@@ -34,7 +34,7 @@ plot_bar(carbom, fill = taxalevel)
 dev.off()
 
 jpeg("abundanceplot.jpg")
-plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=taxalevel, fill=taxalevel), position="stack")
+plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=taxalevel, fill=taxalevel), stat = stat_identity(), position="stack")
 dev.off()
 
 png("abundanceplot.png")
