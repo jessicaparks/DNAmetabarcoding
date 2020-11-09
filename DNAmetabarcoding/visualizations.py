@@ -61,7 +61,7 @@ def main(directory, outputplot, rank):
         .reset_index(drop=True)
 	.fillna('Unknown')
     )
-    taxa_file = f'{output}/{outputname}_taxa.csv'
+    taxa_file = f'{outputdir}/{outputname}_taxa.csv'
     taxa.to_csv(taxa_file, index=False)
 
     # check the lengths of the abundance and taxa data are the same
