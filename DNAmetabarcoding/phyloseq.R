@@ -40,3 +40,8 @@ dev.off()
 png("abundanceplot.png")
 plot_bar(carbom, fill = taxalevel) + geom_bar(stat="identity", position="stack")
 dev.off()
+
+carbom.ord <- ordinate(carbom, "NMDS", "bray")
+png("nmdsplot.png")
+plot_ordination(carbom, carbom.ord, type="samples", color="sample", title="Samples") + geom_point(size=3)
+dev.off()
