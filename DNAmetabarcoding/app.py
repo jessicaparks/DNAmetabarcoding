@@ -8,7 +8,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-# blast filtering thresholds
+# set blast filtering thresholds
 EVALUE = 0.001
 IDENTITY = 95
 COVERAGE = 90
@@ -16,7 +16,7 @@ COVERAGE = 90
 # set taxonomy ranks to include (in order of increasing specificity)
 ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
 
-# dada2 taxonomy database paths
+# set dada2 taxonomy database paths
 base_dada2_tax = '/usr/local/usrapps/trnL_blast/dada2_taxonomy'
 dada2_tax_dbs = {
     'GTDB': os.path.join(base_dada2_tax, 'GTDB.fasta'),
@@ -31,8 +31,18 @@ os.makedirs(TMP, exist_ok=True)
 
 
 def parse_primers(input, fwd, rev):
-    # prep forward primer file (add ^ to the start of each sequence)
-    # prep reverse primer file (make reverse compliments and add X to the 3' end)
+    """Prepare the primer sequence for use in trimming.
+    A ^ symbol is added to the start of the sequence for use as a forward
+    primer, requiring that it is at the start of the read. An X is added
+    to the end of the reverse complement sequence for use as a reverse primer,
+    requiring that it is at the end of the read and that it can be a partial
+    primer sequence.
+
+    Arguments:
+    input -- a fasta file containing the primer sequences
+    fwd -- output file path for forward primer sequences
+    rev -- output file path for reverse complement primer sequences
+    """
     fwd_records = []
     rev_records = []
     for record in SeqIO.parse(input, 'fasta'):
@@ -47,7 +57,24 @@ def parse_primers(input, fwd, rev):
     SeqIO.write(rev_records, rev, 'fasta')
 
 
-def trim_primers(input, output, adapterless, tooshort, forwardprimers, reverseprimers, samplename):
+def trim_primers(input, output, adapterless, tooshort, forwardprimers,
+                 reverseprimers, samplename):
+    """Trim primer sequences from the sequencing reads.
+    The reads without a primer at the start of the read are excluded and
+    output to a separate file. The reads that are too short (less than 50
+    bases) after trimming are also excluded and output to a separate file.
+
+    Arguments:
+    input -- the fastq file containing the sequencing reads
+    output -- the file path for the trimmed reads
+    adapterless -- the file path for the reads that do not have a primer
+    tooshort -- the file path for the reads that are too short after trimming
+    forwardprimers -- the file path for the forward primers, to be removed
+      from the 5' end of the reads
+    reverseprimers -- the file path for the reverse complement primers, to be
+      removed from the 3' end of the reads
+    samplename -- the name for the sample, to be used in naming files
+    """
     # run cutadapt to trim 5' end
     subprocess.check_call([
         'cutadapt',
@@ -70,12 +97,35 @@ def trim_primers(input, output, adapterless, tooshort, forwardprimers, reversepr
 
 
 def run_dada2(input, output):
+    """Run DADA2 on the input sequence reads to identify ASVs.
+
+    Arguments:
+    input -- the fastq file of sequencing reads
+    output -- the file path for the DADA2 results
+
+    Returns:
+    a dataframe of ASVs with the columns: index, sequence, and abundance
+    """
     subprocess.check_call(['Rscript', 'dada2.R', input, output])
     return pd.read_csv(output, index_col=0).reset_index()
 
 
 def dada2_taxonomy(input, output, reference):
-    subprocess.check_call(['Rscript', 'dada2_taxonomy.R', input, output, reference])
+    """
+    Run DADA2's assignTaxonomy method for taxonomic classification.
+
+    Arguments:
+    input -- the file of ASVs output from DADA2
+    output -- the file path for the DADA2 taxonomy results
+    reference -- the file path for the reference database to use for
+      taxonomic assignment
+
+    Returns:
+    a dataframe containing the sequence and the taxonomy assignment
+    """
+    subprocess.check_call([
+        'Rscript', 'dada2_taxonomy.R', input, output, reference
+    ])
     # read taxonomy results
     taxa = (
         pd.read_csv(output, index_col=0)
@@ -91,6 +141,13 @@ def dada2_taxonomy(input, output, reference):
 
 
 def write_blast_fasta(data, output):
+    """Create a fasta file from a dataframe for use in BLAST.
+
+    Arguments:
+    data -- a dataframe containing sequence and index (identifier) columns
+      for the ASVs
+    output -- the file path for the fasta file
+    """
     records = [
         SeqRecord(Seq(x.sequence), id=str(x.index), description='')
         for x in data.itertuples()
@@ -99,6 +156,20 @@ def write_blast_fasta(data, output):
 
 
 def run_blast(input, output, database, threads):
+    """Run BLAST and filter the results.
+    The BLAST results are filtered by evalue, percent identity, and coverage.
+    The result(s) with maximum percent identity are returned for each input
+    sequence.
+
+    Arguments:
+    input -- the fasta file to be queried with BLAST
+    output -- the file path for the BLAST results
+    database -- the BLAST database to be searched
+    threads -- the threads (or cpus) to use for BLAST
+
+    Returns:
+    a dataframe containing the filtered BLAST results
+    """
     subprocess.check_call([
         'blastn',
         '-db', database,
@@ -124,6 +195,16 @@ def run_blast(input, output, database, threads):
 
 
 def run_taxize(input, output):
+    """Run taxizedb to look up the taxa for the input taxids.
+    taxizedb uses a local database to look up the NCBI taxonomy.
+
+    Arguments:
+    input -- the file containing the list of the taxids
+    output -- the file path for the taxizedb results
+
+    Returns:
+    a dataframe containing the taxids and corresponding taxa at all ranks
+    """
     subprocess.check_call(['Rscript', 'taxizedb.R', input, output])
     taxa = pd.read_csv(output)
     taxa = (
@@ -141,6 +222,16 @@ def run_taxize(input, output):
 
 
 def consistent_taxa(x):
+    """Determine a consistent taxon at each rank.
+    If all results are the same at a given rank, that name is returned for the
+    taxon; otherwise, a null value is returned.
+
+    Arguments:
+    x -- a dataframe containing the taxa identified for one query sequence
+
+    Returns:
+    a dictionary of the consistent taxa names
+    """
     new_taxa = {'qacc': x['qacc'].unique().tolist()[0]}
     stop = 0
     for r in ranks:
@@ -151,10 +242,22 @@ def consistent_taxa(x):
             stop += 1
         if stop > 0:
             new_taxa[r] = None
-    return(new_taxa)
+    return new_taxa
 
 
 def combine_blast_taxize(blast_data, taxa):
+    """Combine the BLAST and taxizedb data.
+    For each query sequence, a single consistent set of taxon names are
+    returned, or a null value for ranks where the taxon names are not
+    consistent.
+
+    Arguments:
+    blast_data -- the dataframe containing the BLAST results
+    taxa -- the dataframe containing the taxa assignments from taxizedb
+
+    Returns:
+    a dataframe containing the resulting taxa assignments
+    """
     # merge blast results with taxize information
     merged = (
         pd.merge(
@@ -181,11 +284,31 @@ def combine_blast_taxize(blast_data, taxa):
 @click.option('-i', '--input', type=click.Path(exists=True), required=True)
 @click.option('-o', '--output', type=click.Path(exists=False), required=True)
 @click.option('--primers', type=click.Path(exists=True), required=True)
-@click.option('--taxmethod', type=click.Choice(['BLAST', 'DADA2'], case_sensitive=False), required=True)
-@click.option('--taxreference', type=click.Choice(dada2_tax_dbs.keys(), case_sensitive=False))
-@click.option('--blastdatabase', default='/gpfs_partners/databases/ncbi/blast/nt/nt')
+@click.option('--taxmethod',
+              type=click.Choice(['BLAST', 'DADA2'], case_sensitive=False),
+              required=True)
+@click.option('--taxreference',
+              type=click.Choice(dada2_tax_dbs.keys(), case_sensitive=False))
+@click.option('--blastdatabase',
+              default='/gpfs_partners/databases/ncbi/blast/nt/nt')
 @click.option('--threads', type=int, default=4, show_default=True)
 def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads):
+    """Identify ASVs and assign taxonomy.
+    This is the main function for the app and it's arguments are specified
+    from the command line. The output is a CSV file containing the ASVs,
+    their abundance, and their taxonomy assignment.
+
+    Arguments:
+    input -- fastq file path for sequence reads
+    output -- output CSV file path
+    primers -- primers fasta file path
+    taxmethod -- the method for taxonomy assignment
+    taxreference -- the taxonomy reference database to be used if assigning
+      taxonomy using DADA2
+    blastdatabase -- the path for the BLAST database to be used if assigning
+      taxonomy using BLAST
+    threads -- the threads/cpus to be used for running multithreaded tasks
+    """
 
     # set input file base name
     base = os.path.basename(input).replace('.gz', '').replace('.fastq', '')
