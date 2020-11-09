@@ -180,10 +180,12 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     tooshort = f'{TMP}/{base}_tooShort.fastq'
     
     # trim primers
+    print('Trimming primers ...')
     parse_primers(primers, fwdprimers, revprimers)
     trim_primers(input, trimmed, adapterless, tooshort, fwdprimers, revprimers, base)
 
     # dada2 asv identification
+    print('Identifying ASVs with DADA2 ...')
     asv = f'{TMP}/{base}_asv.csv'
     asv_data = run_dada2(trimmed, asv)
 
@@ -195,10 +197,12 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
         write_blast_fasta(asv_data, asv_fasta)
 
         # run blast
+        print('Running BLAST ...')
         blast_results = f'{TMP}/{base}_blast.tsv'
         blast_data = run_blast(asv_fasta, blast_results, blastdatabase, threads)
         
         # look up taxa
+        print('Running Taxize ...')
         taxid_list = f'{TMP}/{base}_taxids.csv'
         blast_data[['staxid']].drop_duplicates().to_csv(taxid_list, header=False, index=False)
         taxize_results = f'{TMP}/{base}_taxa.csv'
@@ -217,6 +221,7 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
 
     # via dada2
     if taxmethod == 'DADA2':
+        print('Running DADA2 taxonomy classification ...')
         taxa = f'{TMP}/{base}_taxa.csv'
         dada2_taxonomy(asv, taxa, dada2_tax_dbs[taxreference])
 
@@ -231,7 +236,7 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
 
     # output table with ASVs, abundance, and taxonomy
     output_data.to_csv(output, index=False)
-    print(f'Analysis complete. Results found at {output}')
+    print(f'Analysis complete. Find results at {output}')
 
 if __name__ == '__main__':
     main()
