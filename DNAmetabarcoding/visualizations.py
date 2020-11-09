@@ -27,7 +27,7 @@ def main(directory, rank):
              	pd.read_csv(f)
                 .set_index('sequence')
                 [['abundance']]
-                .rename(columns={'abundance': f.rsplit('.', 1)[0]})
+                .rename(columns={'abundance': os.path.basename(f).rsplit('.', 1)[0]})
                 for f in files
             ],
             axis=1,
@@ -38,7 +38,7 @@ def main(directory, rank):
         .reset_index()
         .rename(columns={'index': 'sequence'})
     )
-    abundance.to_csv('mergedASVdata.csv')
+    abundance.to_csv('mergedASVdata.csv', index=False)
 
     # taxonomy classification data for each sequence
     taxa = (
@@ -55,7 +55,7 @@ def main(directory, rank):
 	.drop_duplicates()
         .reset_index(drop=True)
     )
-    taxa.to_csv('mergedtaxadata.csv')
+    taxa.to_csv('mergedtaxadata.csv', index=False)
 
     # check the lengths of the abundance and taxa data are the same
     # if not, this indicates that the same sequence was identified as
