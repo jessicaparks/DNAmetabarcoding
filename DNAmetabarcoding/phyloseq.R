@@ -28,6 +28,15 @@ carbom <- phyloseq(ASV, TAX)
 total = median(sample_sums(carbom))
 standf = function(x, t=total) round(t * (x / sum(x)))
 carbom = transform_sample_counts(carbom, standf)
+
 pdf("abundanceplot.pdf")
+plot_bar(carbom, fill = taxalevel)
+dev.off()
+
+jpeg("abundanceplot.jpg")
+plot_bar(carbom, fill = taxalevel)
+dev.off()
+
+png("abundanceplot.png")
 plot_bar(carbom, fill = taxalevel)
 dev.off()
