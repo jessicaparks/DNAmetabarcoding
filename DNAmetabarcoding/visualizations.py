@@ -54,6 +54,7 @@ def main(directory, rank):
         )
 	.drop_duplicates()
         .reset_index(drop=True)
+	.fillna('Unknown')
     )
     taxa.to_csv('mergedtaxadata.csv', index=False)
 
