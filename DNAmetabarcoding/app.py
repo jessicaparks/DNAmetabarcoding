@@ -44,14 +44,26 @@ def parse_primers(input, fwd, rev):
     SeqIO.write(rev_records, rev, 'fasta')
 
 
-def trim_primers(input, output, adapterless, tooshort, forwardprimers, reverseprimers):
-    #run cutAdapt to trim 5' end
-    cutadapt5Prime = "cutadapt -g file:" + forwardprimers + " -e=0.25 --untrimmed-output " + adapterless + f" -o {TMP}/temp.fastq " + input
-    os.system(cutadapt5Prime)
-
-    #run cutAdapt to trim 3' end
-    cutadapt3Prime = "cutadapt -a file:" + reverseprimers + " -e=0.25 -m=50 --too-short-output " + tooshort + " -o  " + output + f" {TMP}/temp.fastq"
-    os.system(cutadapt3Prime)
+def trim_primers(input, output, adapterless, tooshort, forwardprimers, reverseprimers, samplename):
+    # run cutadapt to trim 5' end
+    subprocess.check_call([
+        'cutadapt',
+        '-g', f'file:{forwardprimers}',
+        '-e', '0.25', 
+        '--untrimmed-output', adapterless,
+        '-o', f'{TMP}/{samplename}_temp.fastq',
+        input
+    ])
+    # run cutadapt to trim 3' end
+    subprocess.check_call([
+        'cutadapt',
+        '-a', f'file:{reverseprimers}',
+        '-e', '0.25',
+        '-m', '50',
+        '--too-short-output', tooshort,
+        '-o', output,
+       	f'{TMP}/{samplename}_temp.fastq'
+    ])
 
 
 def run_dada2(input, output):
@@ -115,7 +127,7 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     
     # trim primers
     parse_primers(primers, fwdprimers, revprimers)
-    trim_primers(input, trimmed, adapterless, tooshort, fwdprimers, revprimers)
+    trim_primers(input, trimmed, adapterless, tooshort, fwdprimers, revprimers, base)
 
     # dada2 asv identification
     asv = f'{TMP}/{base}_asv.csv'
