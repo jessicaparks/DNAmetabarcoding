@@ -1,6 +1,5 @@
 # DNAmetabarcoding
 
-
 ### Setting up your environment on Henry2
 The DNAmetabarcoding program uses a conda environment. To enable conda access on the HPC, you should run the following two commands and then log out and log back in. This will only need to be done once. For more details on conda setup on use on Henry2, see https://projects.ncsu.edu/hpc/Software/Apps.php?app=Conda.  
 ```bash
@@ -39,6 +38,18 @@ conda env update -f environment.yaml
 ### Running the DNAmetabarcoding program
 
 
+
+
+### Running the visualizations
+
+
+
+
+### Updating the NCBI Taxize database
+
+
+
+
 ### Updating the nt BLAST database
 By default, this program uses the nt BLAST database hosted by Henry2. Documentation for BLAST databases available on Henry2 is found at https://projects.ncsu.edu/hpc/Software/Apps.php?app=BLAST. The nt database is found at `/gpfs_partners/databases/ncbi/blast/nt/nt`.  
 Users can optionally install and use their own copy of the nt database. To download the newest version of the nt BLAST database from NCBI, move to the `/usr/local/usrapps/trnL_blast/ncbi` directory and run the following commands.  
@@ -48,3 +59,5 @@ conda activate /usr/local/usrapps/trnL_blast/conda/envs/dnametabarcoding
 update_blastdb.pl --decompress nt
 ```
 The newest versions of the NCBI BLAST databases can be viewed at https://ftp.ncbi.nlm.nih.gov/blast/db/.
+
+### Downloading data from the HPC cluster
