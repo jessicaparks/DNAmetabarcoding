@@ -12,7 +12,7 @@ tempdir <- args[3]
 samplename <- gsub(pattern='.fastq.gz','',basename(file))
 
 # filter and trim the reads (DADA2 requires no Ns)
-filteredreads <- cat(c(tempdir, '/', samplename, '_filtered.fastq.gz'), sep='')
+filteredreads <- paste0(tempdir, '/', samplename, '_filtered.fastq.gz')
 filterAndTrim(
     fwd = file,
     filt = filteredreads,
