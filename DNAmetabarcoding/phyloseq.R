@@ -7,6 +7,7 @@ args <- commandArgs(trailingOnly = TRUE)
 ASVfile <- args[1]
 Taxafile <- args[2]
 taxalevel <- args[3]
+outputFile <- args[4]
 
 ASV_mat <- read.csv(ASVfile)
 taxa_mat <- read.csv(Taxafile)
@@ -29,7 +30,7 @@ total = median(sample_sums(carbom))
 standf = function(x, t=total) round(t * (x / sum(x)))
 carbom = transform_sample_counts(carbom, standf)
 
-png("abundanceplot.png")
+png(outputFile)
 if(taxalevel == "kingdom"){
   plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=kingdom, fill=kingdom), stat="identity", position="stack")
 } else if(taxalevel == "phylum"){
