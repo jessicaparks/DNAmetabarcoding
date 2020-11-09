@@ -95,6 +95,17 @@ def run_blast(input, output, database, threads):
         '-outfmt', '6 qacc sacc qlen slen pident length qcovs staxid',
         '-out', output
     ])
+    # filter blast results
+    blast_header = ['qacc', 'sacc', 'qlen', 'slen', 'pident', 'length', 'qcovs', 'staxid']
+    blast_data = pd.read_csv(output, header=None, names=blast_header, sep='\t')
+    blast_data = blast_data[blast_data['qcovs']>=COVERAGE].reset_index(drop=True)
+    blast_data = pd.merge(
+        blast_data.groupby('qacc')[['pident']].max().reset_index(),
+        blast_data,
+        on=['qacc', 'pident'],
+        how='inner'
+    )
+    return blast_data
 
 
 def run_taxize(input, output):
@@ -142,23 +153,12 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
 
         # run blast
         blast_results = f'{TMP}/{base}_blast.tsv'
-        run_blast(asv_fasta, blast_results, blastdatabase, threads)
-
-        #filter blast results
-        blast_header = ['qacc', 'sacc', 'qlen', 'slen', 'pident', 'length', 'qcovs', 'staxid']
-        blast_data = pd.read_csv(blast_results, header=None, names=blast_header, sep='\t')
-        blast_data = blast_data[blast_data['qcovs']>=COVERAGE].reset_index(drop=True)
-        top_blast_data = pd.merge(
-            blast_data.groupby('qacc')[['pident']].max().reset_index(),
-            blast_data,
-            on=['qacc', 'pident'],
-            how='inner'
-        )
+        blast_data = run_blast(asv_fasta, blast_results, blastdatabase, threads)
         
         #look up taxa
         ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
         taxid_list = f'{TMP}/{base}_taxids.csv'
-        top_blast_data[['staxid']].drop_duplicates().to_csv(taxid_list, header=False, index=False)
+        blast_data[['staxid']].drop_duplicates().to_csv(taxid_list, header=False, index=False)
         taxize_results = f'{TMP}/{base}_taxa.csv'
         run_taxize(taxid_list, taxize_results)
         taxa = pd.read_csv(taxize_results)
@@ -167,9 +167,9 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
             .pivot(index='taxid', columns='rank', values='name')
             .reset_index()
         )
-        top_blast_data = (
+        blast_data = (
             pd.merge(
-                top_blast_data[['qacc', 'staxid']],
+                blast_data[['qacc', 'staxid']],
                 taxa,
                 left_on='staxid',
                 right_on='taxid',
@@ -194,12 +194,12 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
                     new_taxa[r] = None
             return(new_taxa)
         final_taxa = pd.DataFrame.from_dict(
-            top_blast_data.groupby('qacc')
+            blast_data.groupby('qacc')
             .apply(lambda x: consistent_taxa(x))
             .to_list()
         )
         output_data = pd.merge(
-            pd.read_csv(asv, index_col=0).reset_index(),
+            asv_data,
             final_taxa.rename(columns={'qacc': 'index'}),
             on='index',
             how='left'
