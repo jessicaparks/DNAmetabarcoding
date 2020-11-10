@@ -58,7 +58,7 @@ def parse_primers(input, fwd, rev):
 
 
 def trim_primers(input, output, primerless, tooshort, forwardprimers,
-                 reverseprimers, samplename):
+                 reverseprimers, samplename, cutoff):
     """Trim primer sequences from the sequencing reads.
     The reads without a primer at the start of the read are excluded and
     output to a separate file. The reads that are too short (less than 50
@@ -89,7 +89,7 @@ def trim_primers(input, output, primerless, tooshort, forwardprimers,
         'cutadapt',
         '-a', f'file:{reverseprimers}',
         '-e', '0.25',
-        '-m', '50',
+        '-m', cutoff,
         '--too-short-output', tooshort,
         '-o', output,
        	f'{TMP}/{samplename}_temp.fastq'
@@ -293,7 +293,7 @@ def combine_blast_taxize(blast_data, taxa):
 @click.option('--blastdatabase',
               default='/gpfs_partners/databases/ncbi/blast/nt/nt')
 @click.option('--threads', type=int, default=4, show_default=True)
-def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads):
+def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads, cutoff):
     """Identify ASVs and assign taxonomy.
     This is the main function for the app and it's arguments are specified
     from the command line. The output is a CSV file containing the ASVs,
@@ -309,6 +309,7 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     blastdatabase -- the path for the BLAST database to be used if assigning
       taxonomy using BLAST
     threads -- the threads/cpus to be used for running multithreaded tasks
+    cutoff -- cutoff length for sequences after primer trimming
     """
 
     # set input file base name and get output directory
@@ -325,7 +326,7 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     # trim primers
     print('Trimming primers ...')
     parse_primers(primers, fwdprimers, revprimers)
-    trim_primers(input, trimmed, primerless, tooshort, fwdprimers, revprimers, base)
+    trim_primers(input, trimmed, primerless, tooshort, fwdprimers, revprimers, base; cutoff=50)
 
     # dada2 asv identification
     print('Identifying ASVs with DADA2 ...')
