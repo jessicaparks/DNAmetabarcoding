@@ -19,7 +19,6 @@ filterAndTrim(
     maxN = 0,
     maxEE = 2,
     truncQ = 2,
-    minLen = 50,
     rm.phix = TRUE,
     compress = TRUE,
     multithread = TRUE
