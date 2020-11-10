@@ -35,7 +35,32 @@ def run_phyloseq(asvfile, taxafile, taxarank, plotfile):
 @click.option('-f', '--filter', type=int, default=10, show_default=True,
 	      help='number of top taxa to display in visualization')
 def main(directory, outputdir, outputprefix, rank, filter):
-    """
+    """Summarize the ASV abundance and taxonomy data and plot the abundance.
+    The ASV abundance and taxonomy data from all of the CSV files in the input
+    directory is merged by the ASV sequence.
+
+    This will produce the following output files in the specified output directory:
+    (1) a csv with all the taxonomy data, (2) a csv with all the abundance data,
+    (3) a csv with the merged taxonomy and abundance data, (4) a csv with the
+    filtered taxonomy data where the taxon of interest is replaced with "Other"
+    for values below the cutoff rank abundance, and (5) a png-formated image file
+    with the abundance plot.
+
+    "Unknown" indicates taxonomy values that were not determined. "Other" indicates
+    taxonomy values that are below the rank abundance cutoff, when considering
+    cumulative abundance in all samples in the input directory.
+
+    Note: This relies on the taxonomy determined for each of the samples being
+    consistent for the same ASV sequence. If different methods (BLAST and DADA2)
+    were used to determine the taxonomy, this likely will not be true and will
+    raise an error.\f
+
+    Arguments:
+    directory -- path for directory containing the input CSV files
+    outputdir -- path for the output directory
+    outputprefix -- prefix for the output files
+    rank -- taxonomic rank to be visualized
+    filter -- number of top taxa to display in visualization
     """
     # read the list of CSV files from the input directory
     files = glob.glob(f'{directory}/*.csv')
