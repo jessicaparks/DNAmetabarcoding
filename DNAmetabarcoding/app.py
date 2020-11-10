@@ -282,23 +282,32 @@ def combine_blast_taxize(blast_data, taxa):
 
 
 @click.command()
-@click.option('-i', '--input', type=click.Path(exists=True), required=True)
-@click.option('-o', '--output', type=click.Path(exists=False), required=True)
-@click.option('--primers', type=click.Path(exists=True), required=True)
+@click.option('-i', '--input', type=click.Path(exists=True), required=True,
+              help='fastq file path for sequence reads')
+@click.option('-o', '--output', type=click.Path(exists=False), required=True,
+              help='output CSV file path')
+@click.option('--primers', type=click.Path(exists=True), required=True,
+              help='primers fasta file path')
 @click.option('--taxmethod',
               type=click.Choice(['BLAST', 'DADA2'], case_sensitive=False),
-              required=True)
-@click.option('--taxreference',
-              type=click.Choice(dada2_tax_dbs.keys(), case_sensitive=False))
-@click.option('--blastdatabase',
-              default='/gpfs_partners/databases/ncbi/blast/nt/nt')
-@click.option('--threads', type=int, default=4, show_default=True)
-@click.option('--cutoff', type=int, default=50, show_default=True)
+              required=True, help='the method for taxonomy assignment')
+@click.option('--taxreference', show_default=True, default='UNITE_eukaryote',
+              type=click.Choice(dada2_tax_dbs.keys(), case_sensitive=False),
+              help='the taxonomy reference database to be used if assigning '
+              'taxonomy using DADA2')
+@click.option('--blastdatabase', type=click.Path(), show_default=True,
+              default='/gpfs_partners/databases/ncbi/blast/nt/nt',
+              help='the path for the BLAST database to be used if assigning '
+              'taxonomy using BLAST')
+@click.option('--threads', type=int, default=4, show_default=True,
+              help='the threads/cpus to be used for running multithreaded tasks')
+@click.option('--cutoff', type=int, default=50, show_default=True,
+              help='cutoff length for sequences after primer trimming')
 def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads, cutoff):
     """Identify ASVs and assign taxonomy.
     This is the main function for the app and it's arguments are specified
     from the command line. The output is a CSV file containing the ASVs,
-    their abundance, and their taxonomy assignment.
+    their abundance, and their taxonomy assignment.\f
 
     Arguments:
     input -- fastq file path for sequence reads
