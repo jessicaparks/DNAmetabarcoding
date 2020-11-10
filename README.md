@@ -1,6 +1,24 @@
 # DNAmetabarcoding
 Identification and taxonomic classification of exact amplicon sequence variants (ASVs) from DNA metabarcoding data.
 
+## Table of Contents
+* [Installation](#installation)
+* [Quick Start](#quick-start)
+  * [single sample](#analyze-a-single-sample)
+  * [multiple samples](#analyze-multiple-samples)
+  * [visualization](#create-an-abundance-plot)
+* [Environment](#environment)
+  * [Setting up your environment on Henry2](#setting-up-your-environment-on-henry2)
+  * [The DNAmetabarcoding Conda environment](#the-dnametabarcoding-conda-environment)
+* [The DNAmetabarcoding program](#the-dnametabarcoding-program)
+* [Visualization](#visualization)
+* [Databases](#databases)
+  * [DADA2 taxonomy databases](#dada2-taxonomy-databases)
+  * [NCBI nt BLAST database](#ncbi-nt-blast-database)
+  * [Taxize NCBI database](#taxize-ncbi-database)
+* [Data Storage and Retrieval](#data-storage-and-retrieval)
+  * [Downloading data from the HPC cluster](#downloading-data-from-the-hpc-cluster)
+
 ## Installation
 To install the DNAmetabarcoding program, use the following command. This path can also be copied from the `Code` dropdown menu.
 ```bash
@@ -10,17 +28,17 @@ This will download the code to a directory named `DNAmetabarcoding`.
 
 ## Quick Start
 Each of the following commands should be run from within the DNAmetabarcoding sub-directory. Before running any of these commands, you'll need to do the first step under [Setting up your environment on Henry2](#setting-up-your-environment-on-henry2) to install Conda.
-#### For a single sample:
+#### Analyze a single sample:
 Run the following command with the arguments substituted to match your data.
 ```bash
 conda activate /usr/local/usrapps/trnL_blast/conda/envs/dnametabarcoding
 ./app.py -i INPUT_FASTQ_FILE -o OUTPUT_CSV_FILE --primers PRIMER_FASTA_FILE --taxmethod BLAST
 ```
 
-#### For a list of samples:
+#### Analyze multiple samples:
 Edit the `submit_job.sh` script and run `./submit_job.sh` to send the jobs to the cluster.
 
-#### To create the visualization:
+#### Create an abundance plot:
 Run the following command with the correct arguments for your data. This requires that the csv files that you wish to combine and visualize are in a directory together.
 ```bash
 conda activate /usr/local/usrapps/trnL_blast/conda/envs/dnametabarcoding
@@ -75,9 +93,10 @@ conda env update -f environment.yaml
 
 
 ## Databases
-### Updating the NCBI Taxize database
 
-### Updating the nt BLAST database
+### DADA2 taxonomy databases
+
+### NCBI nt BLAST database
 By default, this program uses the nt BLAST database hosted by Henry2. Documentation for BLAST databases available on Henry2 is found at https://projects.ncsu.edu/hpc/Software/Apps.php?app=BLAST. The nt database is found at `/gpfs_partners/databases/ncbi/blast/nt/nt`.  
 Users can optionally install and use their own copy of the nt database. To download the newest version of the nt BLAST database from NCBI, move to the `/usr/local/usrapps/trnL_blast/ncbi` directory and run the following commands.  
 ```bash
@@ -86,6 +105,8 @@ conda activate /usr/local/usrapps/trnL_blast/conda/envs/dnametabarcoding
 update_blastdb.pl --decompress nt
 ```
 The newest versions of the NCBI BLAST databases can be viewed at https://ftp.ncbi.nlm.nih.gov/blast/db/.
+
+### Taxize NCBI database
 
 ## Data Storage and Retrieval
 
