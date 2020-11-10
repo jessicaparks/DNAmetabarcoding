@@ -1,4 +1,15 @@
 # DNAmetabarcoding
+Identification and taxonomic classification of exact amplicon sequence variants (ASVs) from DNA metabarcoding data.
+
+### Installation
+To install the DNAmetabarcoding program, use `git clone` followed by the appropriate https or ssh path selected from the above `CODE` dropdown menu. This will download the code to a directory named `DNAmetabarcoding`.
+
+### Quick Start
+#### For a single sample:
+
+
+#### For a list of samples:
+
 
 ### Setting up your environment on Henry2
 The DNAmetabarcoding program uses a conda environment. To enable conda access on the HPC, you should run the following two commands and then log out and log back in. This will only need to be done once. For more details on conda setup on use on Henry2, see https://projects.ncsu.edu/hpc/Software/Apps.php?app=Conda.  
@@ -40,7 +51,7 @@ conda env update -f environment.yaml
 
 
 
-### Running the visualizations
+### Running the visualization
 
 
 
@@ -61,3 +72,4 @@ update_blastdb.pl --decompress nt
 The newest versions of the NCBI BLAST databases can be viewed at https://ftp.ncbi.nlm.nih.gov/blast/db/.
 
 ### Downloading data from the HPC cluster
+
