@@ -24,7 +24,7 @@ To install the DNAmetabarcoding program, use the following command. This path ca
 ```bash
 git clone https://github.com/jessicaparks/DNAmetabarcoding.git
 ```
-This will download the code to a directory named `DNAmetabarcoding`.
+This will download the code to a directory named `DNAmetabarcoding`. For authentication, it will ask for your GitHub username and password.
 
 ## Quick Start
 Each of the following commands should be run from within the DNAmetabarcoding sub-directory. Before running any of these commands, you'll need to do the first step under [Setting up your environment on Henry2](#setting-up-your-environment-on-henry2) to install Conda.
