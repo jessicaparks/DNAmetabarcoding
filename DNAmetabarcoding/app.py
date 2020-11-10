@@ -89,7 +89,7 @@ def trim_primers(input, output, primerless, tooshort, forwardprimers,
         'cutadapt',
         '-a', f'file:{reverseprimers}',
         '-e', '0.25',
-        '-m', cutoff,
+        '-m', str(cutoff),
         '--too-short-output', tooshort,
         '-o', output,
        	f'{TMP}/{samplename}_temp.fastq'
