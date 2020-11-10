@@ -2,14 +2,28 @@
 Identification and taxonomic classification of exact amplicon sequence variants (ASVs) from DNA metabarcoding data.
 
 ### Installation
-To install the DNAmetabarcoding program, use `git clone` followed by the appropriate https or ssh path selected from the above `CODE` dropdown menu. This will download the code to a directory named `DNAmetabarcoding`.
+To install the DNAmetabarcoding program, use the following command. This path can also be copied from the `Code` dropdown menu.
+```bash
+git clone https://github.com/jessicaparks/DNAmetabarcoding.git
+```
+This will download the code to a directory named `DNAmetabarcoding`.
 
 ### Quick Start
+Each of the following commands should be run from within the DNAmetabarcoding sub-directory.
 #### For a single sample:
-
+Run the following command with the arguments substituted to match your data.
+```bash
+./app.py -i INPUT_FASTQ_FILE -o OUTPUT_CSV_FILE --primers PRIMER_FASTA_FILE --taxmethod BLAST
+```
 
 #### For a list of samples:
+Edit the `submit_job.sh` script and run `./submit_job.sh` to send the jobs to the cluster.
 
+#### To create the visualization:
+Run the following command with the correct arguments for your data. This requires that the csv files that you wish to combine and visualize are in a directory together.
+```bash
+./visualizations.py -d INPUT_DIRECTORY -o OUTPUT_DIRECTORY -p OUTPUT_FILE_PREFIX -r TAXONOMIC_RANK -f TOP_TAXA_FILTER
+```
 
 ### Setting up your environment on Henry2
 The DNAmetabarcoding program uses a conda environment. To enable conda access on the HPC, you should run the following two commands and then log out and log back in. This will only need to be done once. For more details on conda setup on use on Henry2, see https://projects.ncsu.edu/hpc/Software/Apps.php?app=Conda.  
