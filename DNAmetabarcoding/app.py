@@ -293,7 +293,7 @@ def combine_blast_taxize(blast_data, taxa):
 @click.option('--blastdatabase',
               default='/gpfs_partners/databases/ncbi/blast/nt/nt')
 @click.option('--threads', type=int, default=4, show_default=True)
-def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads, cutoff):
+def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads, cutoff=50):
     """Identify ASVs and assign taxonomy.
     This is the main function for the app and it's arguments are specified
     from the command line. The output is a CSV file containing the ASVs,
@@ -326,7 +326,7 @@ def main(input, output, primers, taxmethod, taxreference, blastdatabase, threads
     # trim primers
     print('Trimming primers ...')
     parse_primers(primers, fwdprimers, revprimers)
-    trim_primers(input, trimmed, primerless, tooshort, fwdprimers, revprimers, base; cutoff=50)
+    trim_primers(input, trimmed, primerless, tooshort, fwdprimers, revprimers, base, cutoff)
 
     # dada2 asv identification
     print('Identifying ASVs with DADA2 ...')
