@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 library(phyloseq, quietly=TRUE)
 library(ggplot2, quietly=TRUE)
-library(dplyr, quietly=TRUE)
+library(dplyr, quietly=TRUE, warn.conflicts = FALSE)
 
 #read in arguments (passed from visualizations.py)
 args <- commandArgs(trailingOnly = TRUE)
@@ -47,7 +47,6 @@ standf = function(x, t=total) round(t * (x / sum(x)))
 carbom = transform_sample_counts(carbom, standf)
 
 #make abundance plot based on taxa level chosen
-png(outputFile)
 if(taxalevel == "kingdom"){
   plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=kingdom, fill=kingdom), stat="identity", position="stack")
 } else if(taxalevel == "phylum"){
@@ -63,11 +62,11 @@ if(taxalevel == "kingdom"){
 } else if(taxalevel == "species"){
   plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=species, fill=species), stat="identity", position="stack")
 }
-dev.off()
+ggsave(outputFile, height=8, width=12)
 
 #make nmds plots
-#png(outputFile/location for nmds plot)  uncomment for nmds plots
+#uncomment for nmds plots
 #carbom.ord <- ordinate(carbom, "NMDS", "bray")
 #plot_ordination(carbom, carbom.ord, type="samples", color="fraction", shape="level", title="Samples") + geom_point(size=3) #uncomment for nmds plots
     #Note: fill in variable to color by for "fraction", fill in variable to shape by for "level", remove shape and/or color if not desired and you just want circular black samples
-#dev.off()
+#ggsave(location for nmds plot, height=8, width=12)
