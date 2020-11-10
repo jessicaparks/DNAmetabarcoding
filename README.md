@@ -1,6 +1,8 @@
 # DNAmetabarcoding
 Identification and taxonomic classification of exact amplicon sequence variants (ASVs) from DNA metabarcoding data.
 
+The DNAmetabarcoding program processes fastq-formatted DNA metabarcoding sequence data to produce a summary of the ASVs contained in each sample. It uses [cutadapt](https://cutadapt.readthedocs.io/en/stable/) to trim primers from the sequences and [DADA2](https://benjjneb.github.io/dada2/index.html) to identify and count abundance of the ASVs. It assigns taxonomy through either DADA2 or BLAST, depending on the user's request; and allows visualization of the resulting taxa for a user-defined set of samples.
+
 ## Table of Contents
 * [Installation](#installation)
 * [Quick Start](#quick-start)
