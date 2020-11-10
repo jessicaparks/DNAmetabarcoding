@@ -19,7 +19,8 @@ The DNAmetabarcoding program processes fastq-formatted DNA metabarcoding sequenc
   * [NCBI nt BLAST database](#ncbi-nt-blast-database)
   * [Taxize NCBI database](#taxize-ncbi-database)
 * [Data Storage and Retrieval](#data-storage-and-retrieval)
-  * [Downloading data from the HPC cluster](#downloading-data-from-the-hpc-cluster)
+  * [Data storage on the HPC](#data-storage-on-the-hpc)
+  * [Downloading data from the HPC](#downloading-data-from-the-hpc)
 
 ## Installation
 To install the DNAmetabarcoding program, use the following command. This path can also be copied from the `Code` dropdown menu.
@@ -112,5 +113,19 @@ The newest versions of the NCBI BLAST databases can be viewed at https://ftp.ncb
 
 ## Data Storage and Retrieval
 
-### Downloading data from the HPC cluster
+### Data storage on the HPC
+There are several important locations on the HPC for data storage:
+* Each user has their own directory, located at `/home/USERNAME`. This location has 1GB of storage space, so it's not usually enough for large data files.
+* The HPC provides a directory for user-maintained software, which is located at `/usr/local/usrapps/trnL_blast` for this group. This space is where the conda environment and supplemental databases associated with this program are installed.
+* Scratch storage space for the group is located at `/share/trnL_blast`. The group has 10TB of space available in this shared directory, but the space is not backed up and files are deleted after 30 days if not accessed. This is the recommended location for storing data and results while running an analysis.
+* The HPC can also provide a mass storage directory for the group, if desired. Or, data can be transfered to local storage after analysis.
 
+### Downloading data from the HPC
+To download data from the HPC to your local computer, you can run the following command from a terminal window on your computer. This uses the [scp](https://man7.org/linux/man-pages/man1/scp.1.html) program to transfer the file to your computer. Substitute `USER` for your username on the HPC, and fill in the correct file paths. This will ask for your username, password, and two-factor authentication for logging into the HPC.
+```bash
+scp USER@login.hpc.ncsu.edu:/path/to/file/on/hpc /local/path/
+```
+To transfer an entire directory of files, use the `-r` argument, as shown below.
+```bash
+scp -r USER@login.hpc.ncsu.edu:/path/to/directory/on/hpc /local/path/
+```
