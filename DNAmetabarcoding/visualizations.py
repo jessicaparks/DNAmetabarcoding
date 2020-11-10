@@ -129,7 +129,7 @@ def main(directory, outputdir, outputprefix, rank, filter):
         all_data[all_data[rank]!='Unknown']
         .groupby(rank).sum()
         .sum(axis=1)
-        .sort_values(ascending=False)[:20]
+        .sort_values(ascending=False)[:filter]
         .index.tolist() + ['Unknown']
     )
     taxa[rank] = taxa[rank].apply(lambda x: x if x in keep else 'Other')
