@@ -150,7 +150,9 @@ def main(directory, outputdir, outputprefix, rank, filter):
     )
 
     plot_file = f'{outputdir}/{outputprefix}_abundance_plot.png'
+    print('Creating plot ...')
     run_phyloseq(abundance_file, filt_taxa_file, rank, plot_file)
+    print(f'Abundance plot: {plot_file}')
 
 
 if __name__ == '__main__':
