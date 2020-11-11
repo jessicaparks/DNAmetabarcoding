@@ -52,8 +52,9 @@ def main(directory, outputdir, outputprefix, rank, filter):
 
     Note: This relies on the taxonomy determined for each of the samples being
     consistent for the same ASV sequence. If different methods (BLAST and DADA2)
-    were used to determine the taxonomy, this likely will not be true and will
-    raise an error.\f
+    were used to determine the taxonomy, this likely will not be true and the
+    resulting taxonomy summary will choose alphabetically the first taxonomic
+    assignment for each ASV sequence.\f
 
     Arguments:
     directory -- path for directory containing the input CSV files
@@ -102,7 +103,8 @@ def main(directory, outputdir, outputprefix, rank, filter):
             sort=False,
             ignore_index=True
         )
-        .drop_duplicates()
+        .sort_values(ranks)
+        .drop_duplicates('sequence')
         .reset_index(drop=True)
         .fillna('Unknown')
     )
@@ -138,16 +140,6 @@ def main(directory, outputdir, outputprefix, rank, filter):
     filt_taxa_file = f'{outputdir}/{outputprefix}_filtered_taxa.csv'
     taxa.to_csv(filt_taxa_file, index=False)
     print(f'Filtered taxonomy data: {filt_taxa_file}')
-
-    # check the lengths of the abundance and taxa data are the same
-    # if not, this indicates that the same sequence was identified as
-    # belonging to different taxa, and some of the data should be updated
-    if len(abundance) != len(taxa):
-        raise ValueError(
-            'ASVs are not uniquely identified from all samples. '
-            'Check that the samples were analyzed with the same taxonomy '
-            'method (BLAST or DADA2) and the same database.'
-    )
 
     plot_file = f'{outputdir}/{outputprefix}_abundance_plot.png'
     print('Creating plot ...')
