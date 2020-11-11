@@ -102,6 +102,7 @@ DADA2's maintainers and community have both contributed taxonomy databases that 
 ```bash
 scp DATA.fasta USER@login.hpc.ncsu.edu:/usr/local/usrapps/trnL_blast/dada2_taxonomy/
 ```
+To add new databases from DADA2 (ie. not GTDB or UNITE), you can copy the fasta-formatted file to this same dada2_taxonomy directory and then the name of the file will appear as a new option for using the database with the help message from `./app.py --help`. As with GTDB and UNITE, it's advisable to rename the file to a short word or phrase that is understandable, and version numbers can be included in any of the file names if you want to keep multiple versions.
 
 ### NCBI nt BLAST database
 By default, this program uses the nt BLAST database hosted by Henry2. Documentation for BLAST databases available on Henry2 is found at https://projects.ncsu.edu/hpc/Software/Apps.php?app=BLAST. The nt database is found at `/gpfs_partners/databases/ncbi/blast/nt/nt`.  
