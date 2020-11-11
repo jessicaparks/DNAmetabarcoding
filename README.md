@@ -92,8 +92,56 @@ conda env update -f environment.yaml
 
 
 ## Visualization
+The visualization portion of this program is provided as a separate script, `visualizations.py`, to allow users the flexibility to combine and visualize data from any set of samples. The samples to include are specified by providing the directory that contains the result CSV files (output by the `app.py` program) for these samples. To run the visualization for a custom set of samples, copy the result CSV files for those samples to a new directory. Note, all CSV files in the directory will be considered.
 
+The documentation and help text for the visualization program can viewed by running `./visualizations.py --help`, which will produce a help message like that shown below.
+```
+Usage: visualizations.py [OPTIONS]
 
+  Summarize the ASV abundance and taxonomy data and plot the abundance. The
+  ASV abundance and taxonomy data from all of the CSV files in the input
+  directory is merged by the ASV sequence.
+
+  This will produce the following output files in the specified output
+  directory: (1) a csv with all the taxonomy data, (2) a csv with all the
+  abundance data, (3) a csv with the merged taxonomy and abundance data, (4)
+  a csv with the filtered taxonomy data where the taxon of interest is
+  replaced with "Other" for values below the cutoff rank abundance, and (5)
+  a png-formated image file with the abundance plot.
+
+  "Unknown" indicates taxonomy values that were not determined. "Other"
+  indicates taxonomy values that are below the rank abundance cutoff, when
+  considering cumulative abundance in all samples in the input directory.
+
+  Note: This relies on the taxonomy determined for each of the samples being
+  consistent for the same ASV sequence. If different methods (BLAST and
+  DADA2) were used to determine the taxonomy, this likely will not be true
+  and the resulting taxonomy summary will choose alphabetically the first
+  taxonomic assignment for each ASV sequence.
+
+Options:
+  -d, --directory DIRECTORY       path for directory containing the input CSV
+                                  files  [required]
+
+  -o, --outputdir DIRECTORY       path for the output directory  [required]
+  -p, --outputprefix TEXT         prefix for the output files  [required]
+  -r, --rank [kingdom|phylum|class|order|family|genus|species]
+                                  taxonomic rank to be visualized  [required]
+  -f, --filter INTEGER            number of top taxa to display in
+                                  visualization  [default: 10]
+
+  --help                          Show this message and exit.
+```
+
+As indicated by the help message, the visualization code can be run as follows:
+```bash
+./visualizations.py -d INPUT_DIRECTORY -o OUTPUT_DIRECTORY -p OUTPUT_FILE_PREFIX -r TAXONOMIC_RANK -f TOP_TAXA_FILTER
+```
+
+The `INPUT_DIRECTORY` is the directory that contains the CSV result files for the samples to be visualized. The `OUTPUT_DIRECTORY` is the location that the program will write the output files. The `OUTPUT_FILE_PREFIX` is the prefix for the output file names, ie. a prefix of `ITS2_run1` would result in output files of `ITS2_run1_taxa.csv` and `ITS2_run1_abundance_plot.csv`. The `TAXONOMIC RANK` is the rank at which the data will be plotted, ie `phylum`. And, the `TOP_TAXA_FILTER` is the maximum number of top taxa by rank abundance over all samples that will be displayed as individual taxa in the plot (other taxa will be grouped together and labeled as "Other"). As indicated in the help message, the `TOP_TAXA_FILTER` defaults to 10 if no value is provided. This would include the top 10 taxa at that rank plus the "Unknown" group and an "Other" group.
+
+An example figure from the visualization program is shown below. The input data was a set of ITS2 samples that were analyzed with DADA2 taxonomic assignment.
+<img src="examples/ITS2_dada2tax_abundance_plot.png">
 
 ## Databases
 
