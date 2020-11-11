@@ -100,7 +100,7 @@ The main script for executing the DNAmetabarcoding program is `app.py`. This scr
 
 The documentation and help text for the `app.py` program can be viewed by running `./app.py --help`, which will produce a help message like that shown below.
 
-```bash
+```
 Usage: app.py [OPTIONS]
 
   Identify ASVs and assign taxonomy. This is the main function for the app
