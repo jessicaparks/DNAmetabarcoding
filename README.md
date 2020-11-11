@@ -98,6 +98,10 @@ conda env update -f environment.yaml
 ## Databases
 
 ### DADA2 taxonomy databases
+DADA2's maintainers and community have both contributed taxonomy databases that can be used to assign taxonomy with DADA2. The current list of taxonomy reference data available can be found in the [DADA2 documentation](https://benjjneb.github.io/dada2/training.html). Currently the **GTDB** and **UNITE** references are downloaded to the cluster and can be found at `/usr/local/usrapps/trnL_blast/dada2_taxonomy/`. The files are named `GTDB.fasta`, `UNITE_eukaryote.fasta`, and `UNITE_fungi.fasta`. To update these data sets, follow the instructions in the above DADA2 documentation to find the link to the data set and download it to your computer. You should change the name of the file to match that already used, and then copy it to the HPC cluster using scp as shown below. Modify `DATA` to match the name of the file you are copying and `USER` to match your username on the cluster.
+```bash
+scp DATA.fasta USER@login.hpc.ncsu.edu:/usr/local/usrapps/trnL_blast/dada2_taxonomy/
+```
 
 ### NCBI nt BLAST database
 By default, this program uses the nt BLAST database hosted by Henry2. Documentation for BLAST databases available on Henry2 is found at https://projects.ncsu.edu/hpc/Software/Apps.php?app=BLAST. The nt database is found at `/gpfs_partners/databases/ncbi/blast/nt/nt`.  
@@ -110,6 +114,11 @@ update_blastdb.pl --decompress nt
 The newest versions of the NCBI BLAST databases can be viewed at https://ftp.ncbi.nlm.nih.gov/blast/db/.
 
 ### Taxize NCBI database
+The NCBI database from [taxizedb](https://ropensci.github.io/taxizedb/) is used to assign taxonomy to the taxids identified with BLAST. The database is stored at `/usr/local/usrapps/trnL_blast/.cache/R/taxizedb/NCBI.sql`. A script, `taxizedb_download.sh`, is provided to update this database. This script can be run using the following command without any arguments, and will download the newest version of the database and place it in the correct location.
+```bash
+./taxizedb_download.sh
+```
+Using taxizedb, which works with a local database, is essential for running jobs on the compute nodes of the cluster. Unlike the login node (which you are using when you login but did not submit jobs), these compute nodes do not have internet access, which would be needed by pytaxize or the regular R taxize program to query NCBI's entrez system.
 
 ## Data Storage and Retrieval
 
