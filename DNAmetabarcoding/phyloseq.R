@@ -47,6 +47,7 @@ standf = function(x, t=total) round(t * (x / sum(x)))
 carbom = transform_sample_counts(carbom, standf)
 
 #make abundance plot based on taxa level chosen
+pdf(NULL)
 if(taxalevel == "kingdom"){
   plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=kingdom, fill=kingdom), stat="identity", position="stack")
 } else if(taxalevel == "phylum"){
