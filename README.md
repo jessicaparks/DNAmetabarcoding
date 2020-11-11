@@ -13,6 +13,10 @@ The DNAmetabarcoding program processes fastq-formatted DNA metabarcoding sequenc
   * [Setting up your environment on Henry2](#setting-up-your-environment-on-henry2)
   * [The DNAmetabarcoding Conda environment](#the-dnametabarcoding-conda-environment)
 * [The DNAmetabarcoding program](#the-dnametabarcoding-program)
+  * [Primer trimming: cutadapt](#primer-trimming-cutadapt)
+  * [ASV identification: DADA2](#asv-identification-dada2)
+  * [Taxonomy: DADA2](#taxonomy-dada2)
+  * [Taxonomy: BLAST + taxizedb](#taxonomy-blast-taxizedb)
 * [Visualization](#visualization)
 * [Databases](#databases)
   * [DADA2 taxonomy databases](#dada2-taxonomy-databases)
@@ -88,7 +92,13 @@ conda env update -f environment.yaml
 
 ## The DNAmetabarcoding program
 
+### Primer trimming: cutadapt
 
+### ASV identification: DADA2
+
+### Taxonomy: DADA2
+
+### Taxonomy: BLAST + taxizedb
 
 
 ## Visualization
