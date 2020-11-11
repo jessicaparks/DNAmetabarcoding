@@ -16,7 +16,7 @@ The DNAmetabarcoding program processes fastq-formatted DNA metabarcoding sequenc
   * [Primer trimming: cutadapt](#primer-trimming-cutadapt)
   * [ASV identification: DADA2](#asv-identification-dada2)
   * [Taxonomy: DADA2](#taxonomy-dada2)
-  * [Taxonomy: BLAST + taxizedb](#taxonomy-blast-taxizedb)
+  * [Taxonomy: BLAST and taxizedb](#taxonomy-blast-and-taxizedb)
 * [Visualization](#visualization)
 * [Databases](#databases)
   * [DADA2 taxonomy databases](#dada2-taxonomy-databases)
@@ -98,7 +98,7 @@ conda env update -f environment.yaml
 
 ### Taxonomy: DADA2
 
-### Taxonomy: BLAST + taxizedb
+### Taxonomy: BLAST and taxizedb
 
 
 ## Visualization
