@@ -13,6 +13,7 @@ The DNAmetabarcoding program processes fastq-formatted DNA metabarcoding sequenc
   * [Setting up your environment on Henry2](#setting-up-your-environment-on-henry2)
   * [The DNAmetabarcoding Conda environment](#the-dnametabarcoding-conda-environment)
 * [The DNAmetabarcoding program](#the-dnametabarcoding-program)
+  * [Running the program](#running-the-program)
   * [Primer trimming: cutadapt](#primer-trimming-cutadapt)
   * [ASV identification: DADA2](#asv-identification-dada2)
   * [Taxonomy: DADA2](#taxonomy-dada2)
@@ -91,9 +92,84 @@ conda env update -f environment.yaml
 ```
 
 ## The DNAmetabarcoding program
-The DNAmetabarcoding workflow is composed of three steps: primer trimming, identification of exact amplicon sequence variants, and taxonomic classification. This program provides the user with two options for the taxonomy step -- DADA2 and BLAST. Each step is described in detail in the following sections.
+The DNAmetabarcoding workflow is composed of three steps: primer trimming, identification of exact amplicon sequence variants, and taxonomic classification. This program provides the user with two options for the taxonomy step -- DADA2 and BLAST. The first section here describes the process for running the DNAmetabarcoding program, and the steps that this program executes are described in detail in the following sections.
 
+### Running the program
+The main script for executing the DNAmetabarcoding program is `app.py`. This script uses functions from the scripts `dada2.R`, `dada2_taxonomy.R`, and `taxizedb.R`; but none of these scripts need to be directly run by the user. The `app.py` program will analyze a single input fastq file (ie. a single sample). A short job submission example script is provided as `submit_job.sh`, which allows the user to submit a list of samples to the HPC cluster to be analyzed in parallel.
 
+The documentation and help text for the `app.py` program can be viewed by running `./app.py --help`, which will produce a help message like that shown below.
+
+```bash
+Usage: app.py [OPTIONS]
+
+  Identify ASVs and assign taxonomy. This is the main function for the app
+  and it's arguments are specified from the command line. The output is a
+  CSV file containing the ASVs, their abundance, and their taxonomy
+  assignment.
+
+Options:
+  -i, --input PATH                fastq file path for sequence reads
+                                  [required]
+
+  -o, --output PATH               output CSV file path  [required]
+  --primers PATH                  primers fasta file path  [required]
+  --taxmethod [BLAST|DADA2]       the method for taxonomy assignment
+                                  [required]
+
+  --taxreference [GTDB|UNITE_eukaryote|UNITE_fungi]
+                                  the taxonomy reference database to be used
+                                  if assigning taxonomy using DADA2  [default:
+                                  UNITE_eukaryote]
+
+  --blastdatabase PATH            the path for the BLAST database to be used
+                                  if assigning taxonomy using BLAST  [default:
+                                  /gpfs_partners/databases/ncbi/blast/nt/nt]
+
+  --threads INTEGER               the threads/cpus to be used for running
+                                  multithreaded tasks  [default: 4]
+
+  --cutoff INTEGER                cutoff length for sequences after primer
+                                  trimming  [default: 50]
+
+  --help                          Show this message and exit.
+```
+
+As indicated by the help message, the program can be run with one of the following commands. Both commands use the default number of threads (4) and the default minimum length for the reads after primer trimming (50). These defaults and those for the BLAST/DADA2 databases are also given in the help text shown above. To change the value for any of these parameters, add that argument and the new parameter value to the command.  
+
+To analyze taxonomy with BLAST, using the default nt BLAST database provided by the HPC:
+```bash
+./app.py -i INPUT_FASTQ_FILE -o OUTPUT_CSV_FILE --primers PRIMER_FASTA_FILE --taxmethod BLAST
+```
+
+To analyze taxonomy with DADA2, using the default UNITE_eukaryote DADA2 taxonomy reference file:
+```bash
+./app.py -i INPUT_FASTQ_FILE -o OUTPUT_CSV_FILE --primers PRIMER_FASTA_FILE --taxmethod DADA2
+```
+
+To run this program in parallel for a list of samples by submitting each of these to the HPC cluster as a job, there is the provided helper script, `submit_job.sh`. To submit a custom set of jobs to run on the cluster, you should edit this script to reflect your data set. The section of the script that matches that below can be edited to set the appropriate arguments to the `app.py` program that will be run for each sample. For example, you could change `set dada2database = UNITE_eukaryote` to `set dada2database = GTDB` to use a different DADA2 taxonomic reference data set; or you could change `set taxmethod = DADA2` to `set taxmethod = BLAST` to do taxonomic assignment via BLAST instead of DADA2.
+
+Note that the file specified by `filelist` should be a csv or txt file containing a list of the fastq files that should be analyzed. This should have the full path to each file, with each file path on a new line in the file.
+
+```bash
+# set the input list file, the primer fasta file, the output directory, and other parameters
+set filelist = /share/trnL_blast/data/ITS2_list.txt
+set primers = /share/trnL_blast/data/ITS2_primers.fasta
+set outdir = /share/trnL_blast/data/ITS2_results_dada2
+set cutoff = 50
+set threads = 8
+set taxmethod = DADA2
+set blastdatabase = /gpfs_partners/databases/ncbi/blast/nt/nt
+set dada2database = UNITE_eukaryote
+```
+
+Once you edit the script to reflect your data and parameters, you can run it with `./submit_job.sh`. This will submit a job to the cluster for each fastq file in the input list and print a list of the jobs submitted. The status of submitted jobs can be checked by running `bjobs`, which will print a table of information for the jobs currently pending or running for your user. The `STAT` column will denote whether each job is currently in a `PEND` or `RUN` status.
+
+After running a single job with `app.py` or a set of jobs with `submit_job.sh`, the specified output path or output directory will contain the following files. Note, the content of the error and output files will instead be printed to your screen when running a single job with `app.py`. The CSV file contains the results from the program, and the other files are provided for understanding any issues with the code or with the sequencing reads for a sample.
+* a CSV file, `SAMPLENAME.csv`: the ASV, abundance, and taxonomy data for each sample
+* a error file, `SAMPLENAME.err.JOBID`: the report of any errors that were encountered during the job
+* a output file, `SAMPLENAME.out.JOBID`: the output from the script that would normally be written to your screen while running
+* a fastq file, `SAMPLENAME_untrimmed.fastq`: the reads where primers were not found
+* a fastq file, `SAMPLENAME_tooshort.fastq`: the reads that did not pass the minimum length filter
 
 ### Primer trimming: cutadapt
 This workflow starts with DNAmetabarcoding fastq sequence files, which can be either gzipped (`.fastq.gz`) or not (`.fastq`). The primer trimming step removes a primer from the beginning of each read (either a forward or reverse primer) and removes the reverse complement of any primers that occur at the end of the read. The primer at the start of the read is required to be complete, or full-length; while, the primer at the end of the read can be incomplete. This second, reverse-complement primer may or may not be present in a given read and occurs when the region being sequenced (ie. the region between the forward and reverse primers) is shorter than the length of the sequencing read.
