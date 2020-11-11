@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import click
+import glob
 import os
 import pandas as pd
 import subprocess
@@ -16,12 +17,12 @@ COVERAGE = 90
 # set taxonomy ranks to include (in order of increasing specificity)
 ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
 
-# set dada2 taxonomy database paths
+# set dada2 taxonomy database paths to include all fasta files
+# in the dada2_taxonomy directory, keyed by the filename
 base_dada2_tax = '/usr/local/usrapps/trnL_blast/dada2_taxonomy'
 dada2_tax_dbs = {
-    'GTDB': os.path.join(base_dada2_tax, 'GTDB.fasta'),
-    'UNITE_fungi': os.path.join(base_dada2_tax, 'UNITE_fungi.fasta'),
-    'UNITE_eukaryote': os.path.join(base_dada2_tax, 'UNITE_eukaryote.fasta')
+    os.path.basename(file).replace('.fasta', ''): file
+    for file in glob.glob(f'{base_dada2_tax}/*.fasta')
 }
 
 # set temporary	directory for intermediate files
