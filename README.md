@@ -14,6 +14,7 @@ The DNAmetabarcoding program processes fastq-formatted DNA metabarcoding sequenc
   * [The DNAmetabarcoding Conda environment](#the-dnametabarcoding-conda-environment)
 * [The DNAmetabarcoding program](#the-dnametabarcoding-program)
   * [Running the program](#running-the-program)
+  * [Example results](#example-results)
   * [Primer trimming: cutadapt](#primer-trimming-cutadapt)
   * [ASV identification: DADA2](#asv-identification-dada2)
   * [Taxonomy: DADA2](#taxonomy-dada2)
@@ -170,6 +171,18 @@ After running a single job with `app.py` or a set of jobs with `submit_job.sh`, 
 * a output file, `SAMPLENAME.out.JOBID`: the output from the script that would normally be written to your screen while running
 * a fastq file, `SAMPLENAME_untrimmed.fastq`: the reads where primers were not found
 * a fastq file, `SAMPLENAME_tooshort.fastq`: the reads that did not pass the minimum length filter
+
+### Example results
+An view of the first few rows from an example CSV results file is shown in the table below. ASV sequences are truncated for display.
+
+| sequence         | abundance | kingdom       | phylum     | class           | order    | family       | genus    | species     |
+|------------------|-----------|---------------|------------|-----------------|----------|--------------|----------|-------------|
+| TGCAGAATCCCGC... | 10216     | Viridiplantae | Anthophyta | Eudicotyledonae | Fagales  | Juglandaceae | Carya    | texana      |
+| TTCAGCGGGTAAT... | 8525      | Viridiplantae | Anthophyta | Eudicotyledonae | Fagales  | Juglandaceae | Carya    | texana      |
+| CTCAGCGGGTAAT... | 5301      | Viridiplantae | Anthophyta | Eudicotyledonae | Lamiales | Oleaceae     | Fraxinus | longicuspis |
+| TGCAGAATCCCGT... | 4767      | Viridiplantae | Anthophyta | Eudicotyledonae | Lamiales | Oleaceae     | Fraxinus | longicuspis |
+| CTCAGCGGGTAAT... | 3945      | Viridiplantae | Anthophyta | Eudicotyledonae | Lamiales | Oleaceae     | Fraxinus | longicuspis |
+
 
 ### Primer trimming: cutadapt
 This workflow starts with DNAmetabarcoding fastq sequence files, which can be either gzipped (`.fastq.gz`) or not (`.fastq`). The primer trimming step removes a primer from the beginning of each read (either a forward or reverse primer) and removes the reverse complement of any primers that occur at the end of the read. The primer at the start of the read is required to be complete, or full-length; while, the primer at the end of the read can be incomplete. This second, reverse-complement primer may or may not be present in a given read and occurs when the region being sequenced (ie. the region between the forward and reverse primers) is shorter than the length of the sequencing read.
