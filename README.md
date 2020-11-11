@@ -91,8 +91,14 @@ conda env update -f environment.yaml
 ```
 
 ## The DNAmetabarcoding program
+The DNAmetabarcoding workflow is composed of three steps: primer trimming, identification of exact amplicon sequence variants, and taxonomic classification. This program provides the user with two options for the taxonomy step -- DADA2 and BLAST. Each step is described in detail in the following sections.
+
+
 
 ### Primer trimming: cutadapt
+This workflow starts with DNAmetabarcoding fastq sequence files, which can be either gzipped (`.fastq.gz`) or not (`.fastq`). The primer trimming step removes a primer from the beginning of each read (either a forward or reverse primer) and removes the reverse complement of any primers that occur at the end of the read. The primer at the start of the read is required to be complete, or full-length; while, the primer at the end of the read can be incomplete. This second, reverse-complement primer may or may not be present in a given read and occurs when the region being sequenced (ie. the region between the forward and reverse primers) is shorter than the length of the sequencing read.
+
+[Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used to perform the primer trimming. It first removes the primer from the start of each read; reads that do not have this primer are excluded and saved to a file titled `SAMPLENAME_untrimmed.fastq`. It next removes any reverse complement primers from the end of each read, allowing for partial matches. Primer matching for both of these cases is performed with a maximum error rate of 0.25 -- see cutadapt's [documentation on error tolerance](https://cutadapt.readthedocs.io/en/stable/guide.html#error-tolerance) for a further description of this topic. After primer trimming, the reads are additionally filtered for length. The minimum read length is a user-configurable parameter with a default value of 50 bases. Reads that do not pass the length filter are excluded and saved to a file titled `SAMPLENAME_tooshort.fastq`. Both files of the excluded reads can be found in the same output directory with the final results. The remaining reads are saved to a fastq file and passed to the next step.
 
 ### ASV identification: DADA2
 
