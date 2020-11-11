@@ -185,7 +185,11 @@ After this read filtering, DADA2 learns the error rates from the sequencing data
 One of the options for taxonomic classification provided with this program is the use of DADA2's assignTaxonomy function. An example of how this is used can be found in the Assign Taxonomy section of the [DADA2 tutorial](https://benjjneb.github.io/dada2/tutorial.html). This uses taxonomy reference data sets, provided by DADA2, which are detailed in the [DADA2 taxonomy databases](#dada2-taxonomy-databases) section below. Currently, the GTDB and UNITE data sets are downloaded to the cluster. The different reference data sets may be more appropriate to use with certain samples, depending on whether the sample composition is microbial, fungal, or other eukarotic. To use the DADA2 taxonomy assignment, set the argument for `--taxmethod` to `DADA2` and the argument for `--taxreference` to the appropriate reference data set.
 
 ### Taxonomy: BLAST and taxizedb
+The other option provided for taxonomic classification is the use of a BLAST search versus the NCBI nt database, followed by the taxonomic assignment for the resulting taxids using [taxizedb](https://ropensci.github.io/taxizedb/).
 
+The BLAST results are filtered by an evalue of 0.001, percent identity of 95, percent query coverage of 90, and maximum hits per sequence of 10. The results are further filtered to identify the top hit(s) for each query sequence by selecting only the hit(s) with the maximum percent identity.
+
+The subject taxids from the filtered blast results are searched against the taxizedb NCBI database to identify the taxa corresponding to each taxid. If multiple taxids were present as the top hit for a sequence, a consensus taxonomy assignment is determined by assigning the taxa down only to the lowest rank that is consistent; lower ranks are not assigned.
 
 ## Visualization
 The visualization portion of this program is provided as a separate script, `visualizations.py`, to allow users the flexibility to combine and visualize data from any set of samples. The samples to include are specified by providing the directory that contains the result CSV files (output by the `app.py` program) for these samples. To run the visualization for a custom set of samples, copy the result CSV files for those samples to a new directory. Note, all CSV files in the directory will be considered.
