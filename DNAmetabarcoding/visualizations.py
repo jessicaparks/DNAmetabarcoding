@@ -34,7 +34,10 @@ def run_phyloseq(asvfile, taxafile, taxarank, plotfile):
 	      required=True, help='taxonomic rank to be visualized')
 @click.option('-f', '--filter', type=int, default=10, show_default=True,
 	      help='number of top taxa to display in visualization')
-def main(directory, outputdir, outputprefix, rank, filter):
+@click.option('-n', '--negativecontrol', type=click.Path(exists=True),
+          help='path for the negative control ASV results to remove from other '
+          'samples, which should be located in the same folder as the samples')
+def main(directory, outputdir, outputprefix, rank, filter, negativecontrol=None):
     """Summarize the ASV abundance and taxonomy data and plot the abundance.
     The ASV abundance and taxonomy data from all of the CSV files in the input
     directory is merged by the ASV sequence.
@@ -62,6 +65,8 @@ def main(directory, outputdir, outputprefix, rank, filter):
     outputprefix -- prefix for the output files
     rank -- taxonomic rank to be visualized
     filter -- number of top taxa to display in visualization
+    negativecontrol -- path for the negative control ASV results to remove from other
+      samples, which should be located in the same folder as the samples
     """
     # read the list of CSV files from the input directory
     files = glob.glob(f'{directory}/*.csv')
@@ -87,6 +92,17 @@ def main(directory, outputdir, outputprefix, rank, filter):
         .reset_index()
         .rename(columns={'index': 'sequence'})
     )
+    if negativecontrol:
+        prefilter_abundance = abundance.copy()
+        # check that negative control is present in the directory
+        assert negativecontrol in files
+        # set all negative control ASV abundance to 0 in all other samples
+        nc = os.path.basename(negativecontrol).rsplit('.', 1)[0]
+        nc_asv = abundance[abundance[nc]>0]['sequence'].tolist()
+        abundance.set_index('sequence', inplace=True)
+        print(f'Setting abundance values for {len(nc_asv)} ASVs found in the negative control to 0.')
+        abundance.loc[nc_asv, list(set(abundance.columns) - {nc})] = 0
+        abundance.reset_index(inplace=True)
     abundance_file = f'{outputdir}/{outputprefix}_ASV.csv'
     abundance.to_csv(abundance_file, index=False)
     print(f'Abundance data: {abundance_file}')
@@ -149,3 +165,4 @@ def main(directory, outputdir, outputprefix, rank, filter):
 
 if __name__ == '__main__':
     main()
+
