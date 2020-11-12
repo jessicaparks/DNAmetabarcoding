@@ -243,15 +243,26 @@ Options:
   -f, --filter INTEGER            number of top taxa to display in
                                   visualization  [default: 10]
 
+  -n, --negativecontrol PATH      path for the negative control ASV results to
+                                  remove from other samples, which should be
+                                  located in the same folder as the samples
+
   --help                          Show this message and exit.
 ```
 
 As indicated by the help message, the visualization code can be run as follows:
 ```bash
-./visualizations.py -d INPUT_DIRECTORY -o OUTPUT_DIRECTORY -p OUTPUT_FILE_PREFIX -r TAXONOMIC_RANK -f TOP_TAXA_FILTER
+./visualizations.py -d INPUT_DIRECTORY -o OUTPUT_DIRECTORY -p OUTPUT_FILE_PREFIX -r TAXONOMIC_RANK -f TOP_TAXA_FILTER -n NEGATIVE_CONTROL_FILE
 ```
 
-The `INPUT_DIRECTORY` is the directory that contains the CSV result files for the samples to be visualized. The `OUTPUT_DIRECTORY` is the location that the program will write the output files. The `OUTPUT_FILE_PREFIX` is the prefix for the output file names, ie. a prefix of `ITS2_run1` would result in output files of `ITS2_run1_taxa.csv` and `ITS2_run1_abundance_plot.csv`. The `TAXONOMIC RANK` is the rank at which the data will be plotted, ie `phylum`. And, the `TOP_TAXA_FILTER` is the maximum number of top taxa by rank abundance over all samples that will be displayed as individual taxa in the plot (other taxa will be grouped together and labeled as "Other"). As indicated in the help message, the `TOP_TAXA_FILTER` defaults to 10 if no value is provided. This would include the top 10 taxa at that rank plus the "Unknown" group and an "Other" group.
+The `INPUT_DIRECTORY` is the directory that contains the CSV result files for the samples to be visualized. The `OUTPUT_DIRECTORY` is the location that the program will write the output files. The `OUTPUT_FILE_PREFIX` is the prefix for the output file names, ie. a prefix of `ITS2_run1` would result in output files of `ITS2_run1_taxa.csv` and `ITS2_run1_abundance_plot.csv`. The `TAXONOMIC RANK` is the rank at which the data will be plotted, ie `phylum`. And, the `TOP_TAXA_FILTER` is the maximum number of top taxa by rank abundance over all samples that will be displayed as individual taxa in the plot (other taxa will be grouped together and labeled as "Other"). As indicated in the help message, the `TOP_TAXA_FILTER` defaults to 10 if no value is provided. This would include the top 10 taxa at that rank plus the "Unknown" group and an "Other" group. The optional parameter for the `NEGATIVE_CONTROL_FILE` allows the user to specify a file that contains ASV/taxa data from a negative control sample. The ASVs that are present at >0 abundance in the negative control file will be set to 0 abundance in all of the other samples.
+
+The outputs from the visualization code will be located in the directory that the user specifies for `OUTPUT_DIRECTORY` and are:
+* `PREFIX_abundance_plot.png`: an abundance plot showing proportion of each taxon in each sample
+* `PREFIX_ASV.csv`: all ASVs and their abundance in each sample
+* `PREFIX_taxa.csv`: all ASVs and their taxonomic assignment
+* `PREFIX_filtered_taxa.csv`: the taxonomic data filtered to only the `TOP_TAXA_FILTER` number of taxa at the rank of interest
+* `PREFIX_all.csv`: the merged ASV, abundance, and taxonomic data for all samples
 
 An example figure from the visualization program is shown below. The input data was a set of ITS2 samples that were analyzed with DADA2 taxonomic assignment.
 <img src="examples/ITS2_dada2tax_abundance_plot.png">
