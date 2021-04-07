@@ -289,7 +289,9 @@ The newest versions of the NCBI BLAST databases can be viewed at https://ftp.ncb
 ### Taxize NCBI database
 The NCBI database from [taxizedb](https://ropensci.github.io/taxizedb/) is used to assign taxonomy to the taxids identified with BLAST. The database is stored at `/usr/local/usrapps/trnL_blast/.cache/R/taxizedb/NCBI.sql`. A script, `taxizedb_download.sh`, is provided to update this database. This script can be run using the following command without any arguments, and will download the newest version of the database and place it in the correct location.
 ```bash
-./taxizedb_download.sh
+cd DNAmetabarcoding
+conda activate /usr/local/usrapps/trnL_blast/conda/envs/dnametabarcoding
+Rscript taxizedb_download.R
 ```
 Using taxizedb, which works with a local database, is essential for running jobs on the compute nodes of the cluster. Unlike the login node (which you are using when you login but did not submit jobs), these compute nodes do not have internet access, which would be needed by pytaxize or the regular R taxize program to query NCBI's entrez system.
 
