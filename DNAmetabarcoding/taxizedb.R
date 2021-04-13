@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 
-# set HOME environment variable to group directory because
-# the taxize database was downloaded to this location
+# set HOME environment variable to user directory under the
+# group directory because the taxize database was downloaded
+# to this location
 user <- Sys.getenv("USER")
 Sys.setenv(HOME = paste("/usr/local/usrapps/trnL_blast/", user, sep=""))
 
