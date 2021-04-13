@@ -2,7 +2,7 @@
 
 # set HOME environment variable to group directory because
 # the taxize database was downloaded to this location
-Sys.setenv(HOME = "/usr/local/usrapps/trnL_blast")
+Sys.setenv(HOME = "/usr/local/usrapps/trnL_blast/$USER")
 
 # load libraries
 library(taxizedb, quietly=TRUE)
