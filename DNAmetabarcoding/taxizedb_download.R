@@ -1,8 +1,10 @@
 #!/usr/bin/env Rscript
 
-# set HOME environment variable to group directory because
-# the taxize database will be downloaded to this location
-Sys.setenv(HOME = "/usr/local/usrapps/trnL_blast/$USER")
+# set HOME environment variable to user directory under the
+# group directory because the taxize database will be
+# downloaded to this location
+user <- Sys.getenv("USER")
+Sys.setenv(HOME = cat("/usr/local/usrapps/trnL_blast/", user, sep=""))
 
 # load taxizedb library
 library(taxizedb, quietly=TRUE)
