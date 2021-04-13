@@ -2,7 +2,8 @@
 
 # set HOME environment variable to group directory because
 # the taxize database was downloaded to this location
-Sys.setenv(HOME = "/usr/local/usrapps/trnL_blast/$USER")
+user <- Sys.getenv("USER")
+Sys.setenv(HOME = paste("/usr/local/usrapps/trnL_blast/", user, sep=""))
 
 # load libraries
 library(taxizedb, quietly=TRUE)
