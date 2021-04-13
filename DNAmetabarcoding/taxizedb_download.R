@@ -4,7 +4,7 @@
 # group directory because the taxize database will be
 # downloaded to this location
 user <- Sys.getenv("USER")
-Sys.setenv(HOME = cat("/usr/local/usrapps/trnL_blast/", user, sep=""))
+Sys.setenv(HOME = paste("/usr/local/usrapps/trnL_blast/", user, sep=""))
 
 # load taxizedb library
 library(taxizedb, quietly=TRUE)
