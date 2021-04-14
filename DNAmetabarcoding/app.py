@@ -243,6 +243,8 @@ def consistent_taxa(x):
             r_taxa = x[r].dropna().unique().tolist()
             if len(r_taxa) == 1:
                 new_taxa[r] = r_taxa[0]
+            elif len(r_taxa) == 0 and r in ['superkingdom', 'kingdom']:
+                new_taxa[r] = None
             else:
                 stop += 1
             if stop > 0:
