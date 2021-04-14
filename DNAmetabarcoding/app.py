@@ -15,7 +15,7 @@ IDENTITY = 95
 COVERAGE = 90
 
 # set taxonomy ranks to include (in order of increasing specificity)
-ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+ranks = ['superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
 
 # set dada2 taxonomy database paths to include all fasta files
 # in the dada2_taxonomy directory, keyed by the filename
@@ -237,12 +237,15 @@ def consistent_taxa(x):
     new_taxa = {'qacc': x['qacc'].unique().tolist()[0]}
     stop = 0
     for r in ranks:
-        r_taxa = x[r].dropna().unique().tolist()
-        if len(r_taxa) == 1:
-            new_taxa[r] = r_taxa[0]
+        if r in x.columns:
+            r_taxa = x[r].dropna().unique().tolist()
+            if len(r_taxa) == 1:
+                new_taxa[r] = r_taxa[0]
+            else:
+                stop += 1
+            if stop > 0:
+                new_taxa[r] = None
         else:
-            stop += 1
-        if stop > 0:
             new_taxa[r] = None
     return new_taxa
 
