@@ -17,16 +17,18 @@ COVERAGE = 90
 # set taxonomy ranks to include (in order of increasing specificity)
 ranks = ['superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
 
+# get username for determining file paths
+user = os.environ['USER']
+
 # set dada2 taxonomy database paths to include all fasta files
 # in the dada2_taxonomy directory, keyed by the filename
-base_dada2_tax = '/usr/local/usrapps/trnL_blast/dada2_taxonomy'
+base_dada2_tax = f'/usr/local/usrapps/trnL_blast/{user}/dada2_taxonomy'
 dada2_tax_dbs = {
     os.path.basename(file).replace('.fasta', ''): file
     for file in glob.glob(f'{base_dada2_tax}/*.fasta')
 }
 
 # set temporary	directory for intermediate files
-user = os.environ['USER']
 TMP = f'/share/trnL_blast/{user}/tmp/dnametabarcoding'
 os.makedirs(TMP, exist_ok=True)
 
