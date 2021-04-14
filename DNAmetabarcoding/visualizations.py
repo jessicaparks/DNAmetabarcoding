@@ -7,7 +7,7 @@ import pandas as pd
 import subprocess
 
 # set options for taxonomic ranks
-ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+ranks = ['superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
 
 
 def run_phyloseq(asvfile, taxafile, taxarank, plotfile):
