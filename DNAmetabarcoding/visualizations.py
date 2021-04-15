@@ -112,7 +112,7 @@ def main(directory, outputdir, outputprefix, rank, filter, negativecontrol=None)
         pd.concat(
             [
              	pd.read_csv(f)
-                [['sequence', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']]
+                [['sequence', 'superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']]
                 for f in files
             ],
             axis=0,
