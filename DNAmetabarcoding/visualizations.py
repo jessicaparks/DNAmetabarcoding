@@ -34,10 +34,12 @@ def run_phyloseq(asvfile, taxafile, taxarank, plotfile):
 	      required=True, help='taxonomic rank to be visualized')
 @click.option('-f', '--filter', type=int, default=10, show_default=True,
 	      help='number of top taxa to display in visualization')
+@click.option('--fill-kingdom', is_flag=True, default=False,
+	      help='fill the kingdom rank from superkingdom if kingdom is not assigned')
 @click.option('-n', '--negativecontrol', type=click.Path(exists=True),
-          help='path for the negative control ASV results to remove from other '
-          'samples, which should be located in the same folder as the samples')
-def main(directory, outputdir, outputprefix, rank, filter, negativecontrol=None):
+              help='path for the negative control ASV results to remove from other '
+              'samples, which should be located in the same folder as the samples')
+def main(directory, outputdir, outputprefix, rank, filter, fillkingdom, negativecontrol=None):
     """Summarize the ASV abundance and taxonomy data and plot the abundance.
     The ASV abundance and taxonomy data from all of the CSV files in the input
     directory is merged by the ASV sequence.
@@ -122,8 +124,10 @@ def main(directory, outputdir, outputprefix, rank, filter, negativecontrol=None)
         .sort_values(ranks)
         .drop_duplicates('sequence')
         .reset_index(drop=True)
-        .fillna('Unknown')
     )
+    if fillkingdom:
+        taxa['kingdom'].fillna(taxa['superkingdom'], inplace=True)
+    taxa.fillna('Unknown', inplace=True)
     taxa_file = f'{outputdir}/{outputprefix}_taxa.csv'
     taxa.to_csv(taxa_file, index=False)
     print(f'Taxonomy data: {taxa_file}')
