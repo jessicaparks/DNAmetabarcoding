@@ -34,7 +34,7 @@ def run_phyloseq(asvfile, taxafile, taxarank, plotfile):
 	      required=True, help='taxonomic rank to be visualized')
 @click.option('-f', '--filter', type=int, default=10, show_default=True,
 	      help='number of top taxa to display in visualization')
-@click.option('--fill-kingdom', is_flag=True, default=False,
+@click.option('--fillkingdom', is_flag=True, default=False,
 	      help='fill the kingdom rank from superkingdom if kingdom is not assigned')
 @click.option('-n', '--negativecontrol', type=click.Path(exists=True),
               help='path for the negative control ASV results to remove from other '
@@ -67,6 +67,8 @@ def main(directory, outputdir, outputprefix, rank, filter, fillkingdom, negative
     outputprefix -- prefix for the output files
     rank -- taxonomic rank to be visualized
     filter -- number of top taxa to display in visualization
+    fillkingdom -- option to fill the kingdom rank from superkingdom if kingdom is
+      not assigned
     negativecontrol -- path for the negative control ASV results to remove from other
       samples, which should be located in the same folder as the samples
     """
