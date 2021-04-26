@@ -48,7 +48,9 @@ carbom = transform_sample_counts(carbom, standf)
 
 #make abundance plot based on taxa level chosen
 pdf(NULL)
-if(taxalevel == "kingdom"){
+if(taxalevel == "superkingdom"){
+  plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=superkingdom, fill=superkingdom), stat="identity", position="stack")
+} else if(taxalevel == "kingdom"){
   plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=kingdom, fill=kingdom), stat="identity", position="stack")
 } else if(taxalevel == "phylum"){
   plot_bar(carbom, fill = taxalevel) + geom_bar(aes(color=phylum, fill=phylum), stat="identity", position="stack")
