@@ -38,7 +38,7 @@ ASV = otu_table(ASV_mat, taxa_are_rows = TRUE)
 TAX = tax_table(taxa_mat)
 #samples = sample_data(samples_df) uncomment if you have a sample file
 
-#create pjhyloseq object
+#create phyloseq object
 carbom <- phyloseq(ASV, TAX) #or use carbom <- phyloseq(ASV, TAX, samples) if you have a sample file
 
 #normalize the data
