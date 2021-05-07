@@ -135,6 +135,7 @@ def dada2_taxonomy(input, output, reference):
         pd.read_csv(output, index_col=0)
         .reset_index()
         .rename(columns={'index': 'sequence'})
+        .insert(loc=1, column='superkingdom', value='')
     )
     # change column names to lowercase
     taxa.rename(columns={c: c.lower() for c in taxa.columns}, inplace=True)
@@ -222,6 +223,8 @@ def run_taxize(input, output):
         x.species.replace(str(x.genus), '').strip(),
         axis=1
     )
+    # fill null kingdom values from superkingdom
+    taxa['kingdom'].fillna(taxa['superkingdom'], inplace=True)
     return taxa
 
 
